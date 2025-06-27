@@ -1,0 +1,79 @@
+@import "tailwindcss";
+@plugin "daisyui" {
+  themes: neutral-1 --default;
+}
+@source inline("bg-error/{{0..100..5}}");
+@source inline("bg-success/{{0..100..5}}");
+@source inline("bg-warning/{{0..100..5}}");
+
+body, html, #root {
+  width:100%;
+  height:100%;
+}
+
+.glass-bg {
+  background: rgba(0, 0, 0, 0.31);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(2.5px);
+  -webkit-backdrop-filter: blur(8.6px);
+}
+
+.glass-bg-2 {
+ 
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.fade-in {
+  animation: fadeIn ease-in-out .15s;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+
+
+
+@plugin "daisyui/theme" {
+  name: "neutral-1";
+  default: true;
+  prefersdark: false;
+  color-scheme: "light";
+  --color-base-100: oklch(95.127% 0.007 260.731);
+  --color-base-200: oklch(93.299% 0.01 261.788);
+  --color-base-300: oklch(89.925% 0.016 262.749);
+  --color-base-content: oklch(32.437% 0.022 264.182);
+  --color-primary: oklch(78% 0.154 211.53);
+  --color-primary-content: oklch(11.887% 0.015 254.027);
+  --color-secondary: oklch(69.651% 0.059 248.687);
+  --color-secondary-content: oklch(13.93% 0.011 248.687);
+  --color-accent: oklch(77.464% 0.062 217.469);
+  --color-accent-content: oklch(15.492% 0.012 217.469);
+  --color-neutral: oklch(45.229% 0.035 264.131);
+  --color-neutral-content: oklch(89.925% 0.016 262.749);
+  --color-info: oklch(69.207% 0.062 332.664);
+  --color-info-content: oklch(13.841% 0.012 332.664);
+  --color-success: oklch(76.827% 0.074 131.063);
+  --color-success-content: oklch(39% 0.095 152.535);
+  --color-warning: oklch(85.486% 0.089 84.093);
+  --color-warning-content: oklch(55% 0.163 48.998);
+  --color-error: oklch(60.61% 0.12 15.341);
+  --color-error-content: oklch(93% 0.032 17.717);
+  --radius-selector: 1rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+
+
