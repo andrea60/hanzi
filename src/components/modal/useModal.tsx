@@ -1,9 +1,8 @@
-import { atom, useAtom } from "jotai";
 import { Overlay } from "./Overlay";
 import { PropsWithChildren } from "react";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import { motion } from "framer-motion";
-
+import { create } from "zustand";
 type ModalCloseReason = "cancel" | "complete";
 type OpenModalState<TResult = any, TProps = any> = {
   isOpen: true;
@@ -27,6 +26,9 @@ type CloseModalState = {
 };
 
 type ModalState = OpenModalState | CloseModalState;
+type InternalModalState = {
+  updateState: (state: ModalState) => void;
+} & ModalState;
 
 type ModalResult<TResult> = {
   result: TResult;
@@ -42,10 +44,13 @@ type ModalContentComponent<
   TProps = unknown,
 > = React.ComponentType<ModalContentProps<TResult, TProps>>;
 
-const modalAtom = atom<ModalState>({ isOpen: false });
+const useModalState = create<InternalModalState>((set) => ({
+  isOpen: false,
+  updateState: (state: ModalState) => set(state),
+}));
 
 export const useModal = () => {
-  const [modal, setModal] = useAtom(modalAtom);
+  const { updateState, ...modal } = useModalState();
 
   const openModal = async <TResult = void, TProps = unknown>(
     opts: {
@@ -60,7 +65,7 @@ export const useModal = () => {
       (resolve) => (completeModal = resolve)
     );
 
-    setModal({
+    updateState({
       isOpen: true,
       close: completeModal,
       ...opts,
@@ -70,19 +75,19 @@ export const useModal = () => {
       const result = await waitingPromise;
       return result;
     } finally {
-      setModal({ isOpen: false });
+      updateState({ isOpen: false });
     }
   };
 
   const closeModal = () => {
-    setModal({ isOpen: false });
+    updateState({ isOpen: false });
   };
 
   return { openModal, closeModal, isModalActive: modal.isOpen };
 };
 
 export const ModalRenderer = () => {
-  const [modal] = useAtom(modalAtom);
+  const modal = useModalState();
 
   const cancel = () => {
     if (!modal.isOpen) return;

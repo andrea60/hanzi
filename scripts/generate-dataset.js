@@ -31,7 +31,7 @@ const strokesData = readAsJson("strokes.json");
 const pinyinData = readAsJson("pinyin.json");
 
 // map each stroke to its pinyin
-const characters = {};
+const characters = [];
 
 const stats = {
   missingPinyin: 0,
@@ -45,14 +45,14 @@ Object.entries(strokesData).forEach(([character, strokeData]) => {
     return;
   }
 
-  const [mainPinyin, ...alternativePinyin] = pinyin;
+  const [mainPinyin] = pinyin;
 
   stats.mappedChars++;
-  characters[character] = {
+  characters.push({
+    character,
     strokeData,
     pinyin: mainPinyin,
-    alternativePinyin,
-  };
+  });
 });
 
 console.log(

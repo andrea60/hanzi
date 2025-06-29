@@ -7,7 +7,7 @@ export const Route = createFileRoute("/")({
     await auth.authStateReady();
     if (auth.currentUser) {
       throw redirect({
-        to: "/",
+        to: "/app/dashboard",
       });
     }
   },

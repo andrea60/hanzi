@@ -1,9 +1,9 @@
-import { atom, useAtom } from "jotai";
 import { useEffect } from "react";
 import { match } from "ts-pattern";
 import cn from "classnames";
 import { AnimatePresence, motion } from "framer-motion";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import { create } from "zustand";
 
 type Toast = {
   id: string;
@@ -27,7 +27,30 @@ type StickyToast = {
 
 let lastKnownId = 0;
 
-const toastsAtom = atom<Toast[]>([]);
+type ToastsState = {
+  toasts: Toast[];
+  removeToast: (id: string) => void;
+  addToast: (toast: ToastOptions) => void;
+};
+
+const useToastsState = create<ToastsState>((set, get) => ({
+  toasts: [],
+  removeToast: (id: string) => {
+    set((prev) => ({
+      ...prev,
+      toasts: prev.toasts.filter((toast) => toast.id !== id),
+    }));
+  },
+  addToast: (toast: ToastOptions) => {
+    const id = `toast-${lastKnownId++}`;
+    set((prev) => ({
+      ...prev,
+      toasts: [{ ...toast, id }, ...prev.toasts],
+    }));
+    if (toast.type === "sticky") return;
+    setTimeout(() => get().removeToast(id), toast.duration ?? 5000);
+  },
+}));
 
 let onToastAdded: (toasts: ToastOptions) => void;
 
@@ -36,21 +59,11 @@ export const showToast = (toast: ToastOptions) => {
 };
 
 export const ToastRenderer = () => {
-  const [toasts, setToasts] = useAtom(toastsAtom);
-
-  const removeToast = (id: string) => {
-    setToasts((prev) => prev.filter((toast) => toast.id !== id));
-  };
+  const { addToast, removeToast, toasts } = useToastsState();
 
   useEffect(() => {
-    onToastAdded = (toast: ToastOptions) => {
-      const id = `toast-${lastKnownId++}`;
-      setToasts((prev) => [{ ...toast, id }, ...prev]);
-
-      if (toast.type === "sticky") return;
-      setTimeout(() => removeToast(id), toast.duration ?? 5000);
-    };
-  }, []);
+    onToastAdded = (toast: ToastOptions) => addToast(toast);
+  }, [addToast]);
 
   return (
     <div className="fixed top-0 left-0 z-20 flex items-center w-full p-2 flex-col gap-2 h-0">
@@ -103,16 +116,18 @@ const Toast = (toast: ToastProps) => {
         bgColor + "/45"
       )}
     >
-      <div
-        className={cn(
-          "h-full p-1.5 rounded-full  aspect-square shadow-md ",
-          bgColor,
-          iconColor
-        )}
-      >
-        {toast.icon}
-      </div>
-      <div className="flex-grow">
+      {toast.icon && (
+        <div
+          className={cn(
+            "h-full p-1.5 rounded-full  aspect-square shadow-md ",
+            bgColor,
+            iconColor
+          )}
+        >
+          {toast.icon}
+        </div>
+      )}
+      <div className={cn("flex-grow", toast.icon ? "ml-0" : "ml-2")}>
         {toast.title ? (
           <h1 className={cn("text-sm font-bold")}>{toast.title}</h1>
         ) : null}
