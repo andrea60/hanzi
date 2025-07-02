@@ -49,9 +49,9 @@ Object.entries(strokesData).forEach(([character, strokeData]) => {
 
   stats.mappedChars++;
   characters.push({
-    character,
-    strokeData,
-    pinyin: mainPinyin,
+    c: character,
+    s: strokeData,
+    p: mainPinyin,
   });
 });
 

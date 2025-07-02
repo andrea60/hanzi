@@ -1,9 +1,12 @@
 import Dexie from "dexie";
 
-export type HanziDbRow = {
-  character: string;
-  pinyin: string;
+export type LocalDbStrokeData = {
+  char: string;
   strokeData: unknown;
+};
+export type LocalDbPinyinData = {
+  char: string;
+  pinyin: string;
 };
 
 export type HanziVersionRow = {
@@ -12,10 +15,12 @@ export type HanziVersionRow = {
 };
 
 export const hanziDb = new Dexie("hanzi") as Dexie & {
-  characters: Dexie.Table<HanziDbRow>;
+  strokeData: Dexie.Table<LocalDbStrokeData>;
+  pinyin: Dexie.Table<LocalDbPinyinData>;
   versions: Dexie.Table<HanziVersionRow>;
 };
 hanziDb.version(1).stores({
-  characters: "character, pinyin, strokeData",
+  strokeData: "char",
+  pinyin: "char, pinyin",
   versions: "version, date",
 });

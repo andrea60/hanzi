@@ -4,10 +4,23 @@ import { IndexedDBConfig } from "use-indexeddb/dist/interfaces";
 import { useAsyncEffect } from "../../utils/useAsyncEffect";
 import { ModalContentProps, useModal } from "../../components/modal/useModal";
 import { useQuery } from "@tanstack/react-query";
-import { hanziDb, HanziDbRow } from "./hanzi-dataset.db";
+import {
+  hanziDb,
+  LocalDbPinyinData,
+  LocalDbStrokeData,
+} from "./hanzi-dataset.db";
 import { create } from "zustand";
 import { showToast } from "../../components/toastr/useToast";
 import { fetchWithProgress } from "../../utils/fetchWithProgress";
+
+export type RemoteDataRow = {
+  /** Character */
+  c: string;
+  /** Stroke data */
+  s: unknown;
+  /** Pinyin */
+  p: string;
+};
 
 type HanziDbState = {
   requiresUpdate: boolean;
@@ -59,13 +72,22 @@ export const HanziDataSetProvider = ({ children }: PropsWithChildren) => {
     queryKey: ["hanzi-dataset"],
     retry: true,
     queryFn: async () => {
-      const data = await fetchWithProgress<HanziDbRow[]>(
+      const data = await fetchWithProgress<RemoteDataRow[]>(
         "/dataset-v1.0.0.json",
         setDownloadProgress
       );
 
-      await hanziDb.characters.clear();
-      await hanziDb.characters.bulkAdd(data);
+      await hanziDb.strokeData.clear();
+      await hanziDb.pinyin.clear();
+
+      const strokeData: LocalDbStrokeData[] = [];
+      const pinyinData: LocalDbPinyinData[] = [];
+      data.forEach((row) => {
+        strokeData.push({ char: row.c, strokeData: row.s });
+        pinyinData.push({ char: row.c, pinyin: row.p });
+      });
+      await hanziDb.strokeData.bulkAdd(strokeData);
+      await hanziDb.pinyin.bulkAdd(pinyinData);
 
       await hanziDb.versions.add({ version: "1.0.0", date: new Date() });
 
