@@ -19,7 +19,7 @@ function RouteComponent() {
 
   return (
     <div>
-      <label className="input">
+      <label className="input w-full mb-2">
         <MagnifyingGlassIcon className="size-4" />
         <input
           type="search"
