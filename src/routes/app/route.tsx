@@ -6,7 +6,7 @@ import {
   PlusIcon,
 } from "@heroicons/react/24/outline";
 import { auth } from "../../firebase/firebase.config";
-import { HanziDataSetProvider } from "../../data/hanzi-dataset/HanziDataSetProvider";
+import { HanziDataSetProvider } from "../../data/HanziDataSetProvider";
 
 export const Route = createFileRoute("/app")({
   component: RouteComponent,
