@@ -1,3 +1,5 @@
+public/dataset-*
+
 # Logs
 logs
 *.log
