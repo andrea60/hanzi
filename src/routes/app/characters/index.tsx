@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import React, { useCallback, useState } from "react";
 import { CharactersSearch } from "../../../components/characters/CharactersSearch";
 import debounce from "lodash.debounce";
+import { CharactersList } from "../../../components/characters/CharactersList";
 export const Route = createFileRoute("/app/characters/")({
   component: RouteComponent,
 });
@@ -17,8 +18,10 @@ function RouteComponent() {
     []
   );
 
+  const searchMode = !!searchValue?.trim();
+
   return (
-    <div>
+    <>
       <label className="input w-full mb-2">
         <MagnifyingGlassIcon className="size-4" />
         <input
@@ -28,7 +31,11 @@ function RouteComponent() {
           onChange={handleInputChange}
         />
       </label>
-      <CharactersSearch search={searchValue} />
-    </div>
+      {searchMode ? (
+        <CharactersSearch search={searchValue} />
+      ) : (
+        <CharactersList />
+      )}
+    </>
   );
 }

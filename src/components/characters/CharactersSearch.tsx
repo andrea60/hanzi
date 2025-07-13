@@ -61,16 +61,15 @@ export const CharactersSearch = ({ search }: Props) => {
         <div role="list" className="flex flex-col gap-2">
           {words?.map((word) => <WordCard key={word.word} word={word} />)}
         </div>
-        <div>
-          {hasNextPage && (
-            <button
-              className="btn btn-ghost w-100"
-              onClick={() => fetchNextPage()}
-            >
-              Load more...
-            </button>
-          )}
-        </div>
+
+        {hasNextPage && (
+          <button
+            className="btn btn-ghost w-full"
+            onClick={() => fetchNextPage()}
+          >
+            Load more...
+          </button>
+        )}
       </>
     );
   return <div>Error {error?.message}</div>;

@@ -39,6 +39,7 @@ export const NavigationBar = ({ links }: Props) => {
           <div
             role="navigation"
             className={cn("flex flex-col content-center items-center")}
+            key={link.label}
             onClick={() => handleNavLinkClick(link)}
           >
             <div

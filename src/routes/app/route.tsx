@@ -23,8 +23,8 @@ export const Route = createFileRoute("/app")({
 function RouteComponent() {
   return (
     <HanziDataSetProvider>
-      <div className="flex flex-col h-full relative bg-secondary">
-        <div className="p-4 px-6">
+      <div className="flex flex-col h-full relative bg-neutral ">
+        <div className="p-4 px-6 text-neutral-content">
           <h1 className="font-extrabold text-2xl">Hanzi Writer</h1>
         </div>
         <div className="bg-base-200 flex-1 overflow-y-auto p-6 pt-4 pb-22 rounded-t-3xl shadow-md">

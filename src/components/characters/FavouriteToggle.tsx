@@ -9,14 +9,14 @@ export const FavouriteToggle = ({ isFavourite, onChange }: Props) => {
   if (isFavourite)
     return (
       <StarSolid
-        className="size-6 text-secondary"
+        className="size-6 text-base-content"
         onClick={() => onChange(false)}
       />
     );
 
   return (
     <StarOutline
-      className="size-6 text-secondary"
+      className="size-6 text-base-content"
       onClick={() => onChange(true)}
     />
   );
