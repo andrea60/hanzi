@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import toPinyinTone from "pinyin-tone";
+import zlib from "zlib";
 
 // Get the current file path
 const __filename = fileURLToPath(import.meta.url);
@@ -43,8 +44,9 @@ function readCedict(file) {
 }
 
 function writeAsJson(file, data) {
+  const compressedBuffer = zlib.gzipSync(JSON.stringify(data, null));
   const filePath = path.join(__dirname, `../public/${file}`);
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
+  fs.writeFileSync(filePath, compressedBuffer);
 
   const fileSize = fs.statSync(filePath).size;
   console.log(
@@ -105,7 +107,7 @@ console.log(
 );
 
 // write the output
-writeAsJson("dataset-v1.0.0.json", {
+writeAsJson("dataset-1.0.0.gzip", {
   strokes: strokeData,
   dictionary: dictionaryData,
 });
