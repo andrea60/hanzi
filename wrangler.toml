@@ -1,0 +1,7 @@
+name = "hanzi-trainer"
+type = "webpack"
+account_id = "2331828564d58486402aaaae423355bb"
+zone_id = "b34ed03f7d9342893e66a563d8a97135"
+workers_dev = true
+assets = { not_found_handling = "single-page-application" }
+compatibility_date = "2025-07-13"

@@ -8,9 +8,11 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "generate-dataset": "node scripts/generate-dataset.js"
+    "generate-dataset": "node scripts/generate-dataset.js",
+    "deploy": "wrangler deploy"
   },
   "dependencies": {
+    "@cloudflare/vite-plugin": "^1.9.4",
     "@heroicons/react": "^2.2.0",
     "@tailwindcss/vite": "^4.1.4",
     "@tanstack/react-query": "^5.81.2",
@@ -28,6 +30,7 @@
     "tailwindcss": "^4.1.4",
     "ts-pattern": "^5.7.0",
     "use-indexeddb": "^2.0.2",
+    "wrangler": "^4.24.3",
     "zustand": "^5.0.6"
   },
   "devDependencies": {
