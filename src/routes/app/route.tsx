@@ -1,8 +1,8 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { NavigationBar } from "../../components/NavigationBar";
 import {
-  Cog6ToothIcon,
   ListBulletIcon,
+  MagnifyingGlassIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
 import { auth } from "../../firebase/firebase.config";
@@ -37,8 +37,8 @@ function RouteComponent() {
               { to: "/app/practice", icon: PlusIcon, label: "Practice" },
               {
                 to: "/app/characters",
-                icon: Cog6ToothIcon,
-                label: "Characters",
+                icon: MagnifyingGlassIcon,
+                label: "Search",
               },
             ]}
           />

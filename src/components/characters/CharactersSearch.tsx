@@ -1,7 +1,6 @@
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { db } from "../../data/database.db";
 import { WordCard } from "./WordCard";
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { useMemo } from "react";
 
 const fetchWords = async (

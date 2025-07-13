@@ -19,6 +19,7 @@ type OpenOverlayModalState = {
 type OpenDialogModalState = {
   mode: "dialog";
   title: string;
+  fullWidth?: boolean;
 };
 
 type CloseModalState = {
@@ -113,7 +114,10 @@ export const ModalRenderer = () => {
   };
 
   return (
-    <Overlay onBackdropClick={handleBackdropClick}>
+    <Overlay
+      onBackdropClick={handleBackdropClick}
+      fullWidth={modal.mode == "dialog" && (modal.fullWidth ?? false)}
+    >
       {modal.mode == "overlay" ? (
         overlayContent
       ) : (

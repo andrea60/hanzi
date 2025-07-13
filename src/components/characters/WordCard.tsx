@@ -1,9 +1,8 @@
 import { useMemo } from "react";
-import { db, DictionaryRow } from "../../data/database.db";
+import { DictionaryRow } from "../../data/database.db";
 import { FavouriteToggle } from "./FavouriteToggle";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { auth } from "../../firebase/firebase.config";
-import { useAuth } from "../../auth/useAuth";
+import { useNavigate } from "@tanstack/react-router";
+import { useWordDefinition } from "../../data/queries/useWordDefinition";
 
 const maxDefinitionLength = 125;
 
@@ -12,8 +11,7 @@ type Props = {
 };
 
 export const WordCard = ({ word }: Props) => {
-  const { user } = useAuth();
-  const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const definition = useMemo(() => {
     const text = word.definitions.join(", ");
@@ -23,39 +21,27 @@ export const WordCard = ({ word }: Props) => {
     return text;
   }, word.definitions);
 
-  const { data: isFavourite } = useQuery({
-    queryKey: ["word", word.word],
-    queryFn: async () =>
-      (await db.favourites.where("word").equals(word.word).count()) > 0,
-  });
+  const { wordData, changeFavourite } = useWordDefinition(word.word);
 
-  const { mutateAsync } = useMutation({
-    mutationFn: async (newStatus: boolean) => {
-      if (newStatus)
-        await db.favourites.add({
-          word: word.word,
-          userId: user!.uid,
-          addedAt: new Date(),
-        });
-      else await db.favourites.delete([word.word, user!.uid]);
-    },
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["word", word.word] }),
-  });
+  const handleClick = () => {
+    navigate({ to: "/app/characters/$char", params: { char: word.word } });
+  };
   return (
-    <div className="card shadow">
+    <div className="card shadow" onClick={handleClick}>
       <div className="card-body p-3 h-18 flex flex-row gap-3 items-center">
         <div>
           <p className="text-2xl whitespace-nowrap">{word.word}</p>
         </div>
         <div className="flex-1">
           <h1>{word.pinyin.join("/")}</h1>
-          <p className="text-xs text-ellipsis overflow-hidden">{definition}</p>
+          <p className="text-xs text-ellipsis overflow-hidden max-h-8">
+            {definition}
+          </p>
         </div>
         <div>
           <FavouriteToggle
-            isFavourite={isFavourite ?? false}
-            onChange={(fav) => mutateAsync(fav)}
+            isFavourite={wordData?.data?.isFavourite ?? false}
+            onChange={changeFavourite}
           />
         </div>
       </div>

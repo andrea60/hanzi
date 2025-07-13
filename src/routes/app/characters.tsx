@@ -1,10 +1,11 @@
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { createFileRoute } from "@tanstack/react-router";
-import React, { useCallback, useState } from "react";
-import { CharactersSearch } from "../../../components/characters/CharactersSearch";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 import debounce from "lodash.debounce";
-import { CharactersList } from "../../../components/characters/CharactersList";
-export const Route = createFileRoute("/app/characters/")({
+import { useState, useCallback } from "react";
+import { CharactersList } from "../../components/characters/CharactersList";
+import { CharactersSearch } from "../../components/characters/CharactersSearch";
+
+export const Route = createFileRoute("/app/characters")({
   component: RouteComponent,
 });
 
@@ -36,6 +37,7 @@ function RouteComponent() {
       ) : (
         <CharactersList />
       )}
+      <Outlet />
     </>
   );
 }

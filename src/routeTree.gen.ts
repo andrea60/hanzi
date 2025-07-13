@@ -14,9 +14,10 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as AppRouteImport } from './routes/app/route'
 import { Route as IndexImport } from './routes/index'
 import { Route as CharactersIndexImport } from './routes/characters/index'
+import { Route as AppCharactersImport } from './routes/app/characters'
 import { Route as AppPracticeIndexImport } from './routes/app/practice/index'
 import { Route as AppDashboardIndexImport } from './routes/app/dashboard/index'
-import { Route as AppCharactersIndexImport } from './routes/app/characters/index'
+import { Route as AppCharactersCharImport } from './routes/app/characters/$char'
 
 // Create/Update Routes
 
@@ -38,6 +39,12 @@ const CharactersIndexRoute = CharactersIndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const AppCharactersRoute = AppCharactersImport.update({
+  id: '/characters',
+  path: '/characters',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+
 const AppPracticeIndexRoute = AppPracticeIndexImport.update({
   id: '/practice/',
   path: '/practice/',
@@ -50,10 +57,10 @@ const AppDashboardIndexRoute = AppDashboardIndexImport.update({
   getParentRoute: () => AppRouteRoute,
 } as any)
 
-const AppCharactersIndexRoute = AppCharactersIndexImport.update({
-  id: '/characters/',
-  path: '/characters/',
-  getParentRoute: () => AppRouteRoute,
+const AppCharactersCharRoute = AppCharactersCharImport.update({
+  id: '/$char',
+  path: '/$char',
+  getParentRoute: () => AppCharactersRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -74,6 +81,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRoute
     }
+    '/app/characters': {
+      id: '/app/characters'
+      path: '/characters'
+      fullPath: '/app/characters'
+      preLoaderRoute: typeof AppCharactersImport
+      parentRoute: typeof AppRouteImport
+    }
     '/characters/': {
       id: '/characters/'
       path: '/characters'
@@ -81,12 +95,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CharactersIndexImport
       parentRoute: typeof rootRoute
     }
-    '/app/characters/': {
-      id: '/app/characters/'
-      path: '/characters'
-      fullPath: '/app/characters'
-      preLoaderRoute: typeof AppCharactersIndexImport
-      parentRoute: typeof AppRouteImport
+    '/app/characters/$char': {
+      id: '/app/characters/$char'
+      path: '/$char'
+      fullPath: '/app/characters/$char'
+      preLoaderRoute: typeof AppCharactersCharImport
+      parentRoute: typeof AppCharactersImport
     }
     '/app/dashboard/': {
       id: '/app/dashboard/'
@@ -107,14 +121,26 @@ declare module '@tanstack/react-router' {
 
 // Create and export the route tree
 
+interface AppCharactersRouteChildren {
+  AppCharactersCharRoute: typeof AppCharactersCharRoute
+}
+
+const AppCharactersRouteChildren: AppCharactersRouteChildren = {
+  AppCharactersCharRoute: AppCharactersCharRoute,
+}
+
+const AppCharactersRouteWithChildren = AppCharactersRoute._addFileChildren(
+  AppCharactersRouteChildren,
+)
+
 interface AppRouteRouteChildren {
-  AppCharactersIndexRoute: typeof AppCharactersIndexRoute
+  AppCharactersRoute: typeof AppCharactersRouteWithChildren
   AppDashboardIndexRoute: typeof AppDashboardIndexRoute
   AppPracticeIndexRoute: typeof AppPracticeIndexRoute
 }
 
 const AppRouteRouteChildren: AppRouteRouteChildren = {
-  AppCharactersIndexRoute: AppCharactersIndexRoute,
+  AppCharactersRoute: AppCharactersRouteWithChildren,
   AppDashboardIndexRoute: AppDashboardIndexRoute,
   AppPracticeIndexRoute: AppPracticeIndexRoute,
 }
@@ -126,8 +152,9 @@ const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteRouteWithChildren
+  '/app/characters': typeof AppCharactersRouteWithChildren
   '/characters': typeof CharactersIndexRoute
-  '/app/characters': typeof AppCharactersIndexRoute
+  '/app/characters/$char': typeof AppCharactersCharRoute
   '/app/dashboard': typeof AppDashboardIndexRoute
   '/app/practice': typeof AppPracticeIndexRoute
 }
@@ -135,8 +162,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app': typeof AppRouteRouteWithChildren
+  '/app/characters': typeof AppCharactersRouteWithChildren
   '/characters': typeof CharactersIndexRoute
-  '/app/characters': typeof AppCharactersIndexRoute
+  '/app/characters/$char': typeof AppCharactersCharRoute
   '/app/dashboard': typeof AppDashboardIndexRoute
   '/app/practice': typeof AppPracticeIndexRoute
 }
@@ -145,8 +173,9 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/app': typeof AppRouteRouteWithChildren
+  '/app/characters': typeof AppCharactersRouteWithChildren
   '/characters/': typeof CharactersIndexRoute
-  '/app/characters/': typeof AppCharactersIndexRoute
+  '/app/characters/$char': typeof AppCharactersCharRoute
   '/app/dashboard/': typeof AppDashboardIndexRoute
   '/app/practice/': typeof AppPracticeIndexRoute
 }
@@ -156,24 +185,27 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/app'
-    | '/characters'
     | '/app/characters'
+    | '/characters'
+    | '/app/characters/$char'
     | '/app/dashboard'
     | '/app/practice'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/app'
-    | '/characters'
     | '/app/characters'
+    | '/characters'
+    | '/app/characters/$char'
     | '/app/dashboard'
     | '/app/practice'
   id:
     | '__root__'
     | '/'
     | '/app'
+    | '/app/characters'
     | '/characters/'
-    | '/app/characters/'
+    | '/app/characters/$char'
     | '/app/dashboard/'
     | '/app/practice/'
   fileRoutesById: FileRoutesById
@@ -212,17 +244,24 @@ export const routeTree = rootRoute
     "/app": {
       "filePath": "app/route.tsx",
       "children": [
-        "/app/characters/",
+        "/app/characters",
         "/app/dashboard/",
         "/app/practice/"
+      ]
+    },
+    "/app/characters": {
+      "filePath": "app/characters.tsx",
+      "parent": "/app",
+      "children": [
+        "/app/characters/$char"
       ]
     },
     "/characters/": {
       "filePath": "characters/index.tsx"
     },
-    "/app/characters/": {
-      "filePath": "app/characters/index.tsx",
-      "parent": "/app"
+    "/app/characters/$char": {
+      "filePath": "app/characters/$char.tsx",
+      "parent": "/app/characters"
     },
     "/app/dashboard/": {
       "filePath": "app/dashboard/index.tsx",
