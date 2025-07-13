@@ -5,3 +5,8 @@ zone_id = "b34ed03f7d9342893e66a563d8a97135"
 workers_dev = true
 assets = { not_found_handling = "single-page-application" }
 compatibility_date = "2025-07-13"
+
+
+[[r2_buckets]]
+binding = 'DATASETS_BUCKET' 
+bucket_name = 'hanzi'
