@@ -6,6 +6,8 @@ workers_dev = true
 assets = { not_found_handling = "single-page-application" }
 compatibility_date = "2025-07-13"
 
+main = "worker/index.ts"
+
 
 [[r2_buckets]]
 binding = 'DATASETS_BUCKET' 
