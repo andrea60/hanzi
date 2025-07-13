@@ -8,7 +8,7 @@ export default {
     const datasetMatch = url.pathname.match(versionPathRegex);
     if (datasetMatch) {
       const [, version] = datasetMatch;
-      const dataset = await env.DATASETS_BUCKET.get(version);
+      const dataset = await env.DATASETS_BUCKET.get(`dataset-${version}.gzip`);
       if (!dataset) return new Response("Dataset not found", { status: 404 });
 
       return new Response(dataset.body, {
