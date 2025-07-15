@@ -8,7 +8,7 @@ export const fetchWithProgress = async <T>(
     throw new Error(`Failed to fetch ${url}`);
   }
 
-  const contentLength = response.headers.get("Content-Length");
+  const contentLength = response.headers.get("X-Dataset-Length");
   const total = contentLength ? parseInt(contentLength, 10) : 0;
 
   const reader = response.body.getReader();

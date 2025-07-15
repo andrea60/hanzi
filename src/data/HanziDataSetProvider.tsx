@@ -27,10 +27,11 @@ type HanziDbState = {
   requiresUpdate: boolean;
   isUpdating: boolean;
   downloadProgress: number;
+  downloadState?: string;
 
   setRequiresUpdate: (value: boolean) => void;
   setIsUpdating: (value: boolean) => void;
-  setDownloadProgress: (value: number) => void;
+  setDownloadProgress: (value: number, state: string) => void;
 };
 const useHanziDbState = create<HanziDbState>((set) => ({
   requiresUpdate: false,
@@ -39,7 +40,8 @@ const useHanziDbState = create<HanziDbState>((set) => ({
 
   setRequiresUpdate: (value: boolean) => set({ requiresUpdate: value }),
   setIsUpdating: (value: boolean) => set({ isUpdating: value }),
-  setDownloadProgress: (value: number) => set({ downloadProgress: value }),
+  setDownloadProgress: (value, downloadState) =>
+    set({ downloadProgress: value, downloadState }),
 }));
 
 export const HanziDataSetProvider = ({ children }: PropsWithChildren) => {
@@ -73,14 +75,17 @@ export const HanziDataSetProvider = ({ children }: PropsWithChildren) => {
     queryKey: ["hanzi-dataset"],
     retry: true,
     queryFn: async () => {
+      setDownloadProgress(0, "Downloading");
       const data = await fetchWithProgress<RemoteDataSet>(
-        "/dataset-v1.0.0.json",
-        setDownloadProgress
+        "/api/dataset/latest.json.gz",
+        (p) => setDownloadProgress(p, "Downloading")
       );
 
+      setDownloadProgress(1, "Removing old data");
       await db.strokeData.clear();
       await db.dictionary.clear();
 
+      setDownloadProgress(1, "Parsing data");
       const strokeDataRows: StrokeDataRow[] = Object.entries(data.strokes).map(
         ([char, row]) => ({
           char,
@@ -97,6 +102,7 @@ export const HanziDataSetProvider = ({ children }: PropsWithChildren) => {
         searchablePinyin: row.pinyin.map(normalizePinyin).join(", "),
       }));
 
+      setDownloadProgress(1, "Saving data");
       await db.strokeData.bulkAdd(strokeDataRows);
       await db.dictionary.bulkAdd(dictionaryRows);
 
@@ -126,7 +132,7 @@ export const HanziDataSetProvider = ({ children }: PropsWithChildren) => {
 export const HanziDataSetUpdateModal = (
   props: ModalContentProps<{}, { startDownload: () => void }>
 ) => {
-  const { isUpdating, downloadProgress } = useHanziDbState();
+  const { isUpdating, downloadProgress, downloadState } = useHanziDbState();
   const downloadPerc = Math.round(downloadProgress * 100);
   return (
     <div>
@@ -140,7 +146,8 @@ export const HanziDataSetUpdateModal = (
       >
         {isUpdating ? (
           <>
-            <span className="loading loading-ring loading-lg" /> Downloading...
+            <span className="loading loading-ring loading-lg" /> {downloadState}
+            ...
           </>
         ) : (
           <>Download Now</>
@@ -148,7 +155,7 @@ export const HanziDataSetUpdateModal = (
       </button>
       {isUpdating && (
         <progress
-          className="progress progress-primary w-full"
+          className="progress progress-info w-full"
           value={downloadPerc}
           max={100}
         />

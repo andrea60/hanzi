@@ -2,7 +2,21 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import toPinyinTone from "pinyin-tone";
-import zlib from "zlib";
+import { exec } from "child_process";
+
+const [, , versionStr, remoteFlag] = process.argv;
+if (!versionStr || isNaN(Number(versionStr)))
+  throw new Error(
+    "Please provide a valid version number as the first argument."
+  );
+
+const isRemote = remoteFlag === "--remote" || remoteFlag === "-r";
+const version = Number(versionStr);
+
+console.log("Generating dataset version ", version);
+if (isRemote)
+  console.log("🚨 This will upload the dataset to the production environment!");
+else console.log("This will generate the dataset locally without uploading.");
 
 // Get the current file path
 const __filename = fileURLToPath(import.meta.url);
@@ -44,11 +58,13 @@ function readCedict(file) {
 }
 
 function writeAsJson(file, data) {
-  const compressedBuffer = zlib.gzipSync(JSON.stringify(data, null));
-  const filePath = path.join(__dirname, `../public/${file}`);
-  fs.writeFileSync(filePath, compressedBuffer);
+  const jsonString = JSON.stringify(data, null);
 
-  const fileSize = fs.statSync(filePath).size;
+  console.log("Total JSON size: ", jsonString.length, " characters.");
+  // const compressedBuffer = zlib.gzipSync(jsonString);
+  fs.writeFileSync(file, jsonString);
+
+  const fileSize = fs.statSync(file).size;
   console.log(
     `Wrote ${file} (${(fileSize / 1024 / 1024).toFixed(2)}MB) to output directory.`
   );
@@ -107,7 +123,29 @@ console.log(
 );
 
 // write the output
-writeAsJson("dataset-1.0.0.gzip", {
+const outputDir = path.join(__dirname, "../.tmp");
+
+if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir);
+
+const targetFileName = `dataset-${version}.json`;
+const outputPath = path.join(outputDir, targetFileName);
+console.log("Writing to ", outputPath);
+writeAsJson(outputPath, {
   strokes: strokeData,
   dictionary: dictionaryData,
+});
+
+// Upload to Wrangler
+
+const wranglerCommand = `wrangler r2 object put hanzi/${targetFileName} --file=${outputPath} ${isRemote ? "--remote" : "--local"}`;
+exec(wranglerCommand, (error, stdout, stderr) => {
+  if (error) {
+    console.error(`Error uploading to Wrangler: ${error.message}`);
+    return;
+  }
+  if (stderr) {
+    console.error(`Wrangler stderr: ${stderr}`);
+    return;
+  }
+  console.log(`Wrangler stdout: ${stdout}`);
 });

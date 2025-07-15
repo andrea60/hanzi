@@ -1,5 +1,6 @@
 .wrangler/*
 public/dataset-*
+.tmp/*
 
 # Logs
 logs
