@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { db } from "../database.db";
-import { useAuth } from "../../auth/useAuth";
+import { useAuth } from "../../../auth/useAuth";
 
 const fetchWordDef = async (wordChar: string, userId: string) => {
   const word = await db.dictionary.get(wordChar);

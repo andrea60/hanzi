@@ -1,11 +1,11 @@
 import { PropsWithChildren } from "react";
-import { useAsyncEffect } from "../utils/useAsyncEffect";
-import { ModalContentProps, useModal } from "../components/modal/useModal";
+import { useAsyncEffect } from "../../utils/useAsyncEffect";
+import { ModalContentProps, useModal } from "../../components/modal/useModal";
 import { useQuery } from "@tanstack/react-query";
 import { db, DictionaryRow, StrokeDataRow } from "./database.db";
 import { create } from "zustand";
-import { showToast } from "../components/toastr/useToast";
-import { fetchWithProgress } from "../utils/fetchWithProgress";
+import { showToast } from "../../components/toastr/useToast";
+import { fetchWithProgress } from "../../utils/fetchWithProgress";
 
 export type RemoteDataSet = {
   strokes: Record<

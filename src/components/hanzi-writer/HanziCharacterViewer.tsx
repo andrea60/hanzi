@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import HanziWriter, { CharacterJson } from "hanzi-writer";
-import { db } from "../../data/database.db";
+import { db } from "../../state/database/database.db";
 
 type Props = {
   char: string;

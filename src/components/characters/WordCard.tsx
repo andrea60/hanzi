@@ -1,8 +1,8 @@
 import { useMemo } from "react";
-import { DictionaryRow } from "../../data/database.db";
+import { DictionaryRow } from "../../state/database/database.db";
 import { FavouriteToggle } from "./FavouriteToggle";
 import { useNavigate } from "@tanstack/react-router";
-import { useWordDefinition } from "../../data/queries/useWordDefinition";
+import { useWordDefinition } from "../../state/database/queries/useWordDefinition";
 
 const maxDefinitionLength = 125;
 

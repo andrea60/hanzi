@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { db } from "../../data/database.db";
+import { db } from "../../state/database/database.db";
 import { WordCard } from "./WordCard";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 

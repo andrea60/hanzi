@@ -1,5 +1,5 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { db } from "../../data/database.db";
+import { db } from "../../state/database/database.db";
 import { WordCard } from "./WordCard";
 import { useMemo } from "react";
 

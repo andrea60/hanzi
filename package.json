@@ -22,6 +22,7 @@
     "dexie": "^4.0.11",
     "firebase": "^11.6.0",
     "hanzi-writer": "^3.7.2",
+    "jotai": "^2.12.5",
     "lodash.debounce": "^4.0.8",
     "motion": "^12.7.4",
     "pinyin-tone": "^2.3.4",

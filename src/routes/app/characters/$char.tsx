@@ -5,7 +5,7 @@ import {
 } from "@tanstack/react-router";
 import { useModal } from "../../../components/modal/useModal";
 import { useEffect } from "react";
-import { useWordDefinition } from "../../../data/queries/useWordDefinition";
+import { useWordDefinition } from "../../../state/database/queries/useWordDefinition";
 import { FavouriteToggle } from "../../../components/characters/FavouriteToggle";
 import { HanziWordViewer } from "../../../components/hanzi-writer/HanziWordViewer";
 
