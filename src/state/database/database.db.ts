@@ -22,15 +22,24 @@ export type UserFavouriteRow = {
   addedAt: Date;
 };
 
+export type WordStatRow = {
+  word: string;
+  userId: string;
+  practiceCount: number;
+  lastPracticed: Date;
+  avgConfidence: number;
+};
+
 export const db = new Dexie("hanzi") as Dexie & {
   strokeData: Dexie.Table<StrokeDataRow>;
   dictionary: Dexie.Table<DictionaryRow>;
   versions: Dexie.Table<HanziVersionRow>;
   favourites: Dexie.Table<UserFavouriteRow>;
+  wordStats: Dexie.Table<WordStatRow>;
 };
 db.version(1).stores({
   strokeData: "char",
   dictionary: "word, searchablePinyin",
   versions: "version, date",
-  favourites: "[word+userId]",
+  favourites: "[word+userId], userId",
 });

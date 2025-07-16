@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { db } from "../database.db";
 import { useAuth } from "../../../auth/useAuth";
+import { QueryKey } from "./queryKey";
 
 const fetchWordDef = async (wordChar: string, userId: string) => {
   const word = await db.dictionary.get(wordChar);
@@ -25,7 +26,7 @@ export const useWordDefinition = (wordChar: string) => {
   const { user } = useAuth();
 
   const query = useQuery({
-    queryKey: ["word-definition", wordChar],
+    queryKey: QueryKey.WordDefinition(wordChar),
     queryFn: () => fetchWordDef(wordChar, user!.uid),
   });
 
@@ -39,10 +40,14 @@ export const useWordDefinition = (wordChar: string) => {
         });
       else await db.favourites.delete([wordChar, user!.uid]);
     },
-    onSuccess: () =>
+    onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["word-definition", wordChar],
-      }),
+        queryKey: QueryKey.WordDefinition(wordChar),
+      });
+      queryClient.invalidateQueries({
+        queryKey: QueryKey.Favourites(),
+      });
+    },
   });
 
   return {

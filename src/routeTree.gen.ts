@@ -14,8 +14,8 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as AppRouteImport } from './routes/app/route'
 import { Route as IndexImport } from './routes/index'
 import { Route as CharactersIndexImport } from './routes/characters/index'
+import { Route as AppPracticeSetupImport } from './routes/app/practice-setup'
 import { Route as AppCharactersImport } from './routes/app/characters'
-import { Route as AppPracticeIndexImport } from './routes/app/practice/index'
 import { Route as AppDashboardIndexImport } from './routes/app/dashboard/index'
 import { Route as AppCharactersCharImport } from './routes/app/characters/$char'
 
@@ -39,15 +39,15 @@ const CharactersIndexRoute = CharactersIndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const AppCharactersRoute = AppCharactersImport.update({
-  id: '/characters',
-  path: '/characters',
+const AppPracticeSetupRoute = AppPracticeSetupImport.update({
+  id: '/practice-setup',
+  path: '/practice-setup',
   getParentRoute: () => AppRouteRoute,
 } as any)
 
-const AppPracticeIndexRoute = AppPracticeIndexImport.update({
-  id: '/practice/',
-  path: '/practice/',
+const AppCharactersRoute = AppCharactersImport.update({
+  id: '/characters',
+  path: '/characters',
   getParentRoute: () => AppRouteRoute,
 } as any)
 
@@ -88,6 +88,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCharactersImport
       parentRoute: typeof AppRouteImport
     }
+    '/app/practice-setup': {
+      id: '/app/practice-setup'
+      path: '/practice-setup'
+      fullPath: '/app/practice-setup'
+      preLoaderRoute: typeof AppPracticeSetupImport
+      parentRoute: typeof AppRouteImport
+    }
     '/characters/': {
       id: '/characters/'
       path: '/characters'
@@ -109,13 +116,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardIndexImport
       parentRoute: typeof AppRouteImport
     }
-    '/app/practice/': {
-      id: '/app/practice/'
-      path: '/practice'
-      fullPath: '/app/practice'
-      preLoaderRoute: typeof AppPracticeIndexImport
-      parentRoute: typeof AppRouteImport
-    }
   }
 }
 
@@ -135,14 +135,14 @@ const AppCharactersRouteWithChildren = AppCharactersRoute._addFileChildren(
 
 interface AppRouteRouteChildren {
   AppCharactersRoute: typeof AppCharactersRouteWithChildren
+  AppPracticeSetupRoute: typeof AppPracticeSetupRoute
   AppDashboardIndexRoute: typeof AppDashboardIndexRoute
-  AppPracticeIndexRoute: typeof AppPracticeIndexRoute
 }
 
 const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppCharactersRoute: AppCharactersRouteWithChildren,
+  AppPracticeSetupRoute: AppPracticeSetupRoute,
   AppDashboardIndexRoute: AppDashboardIndexRoute,
-  AppPracticeIndexRoute: AppPracticeIndexRoute,
 }
 
 const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
@@ -153,20 +153,20 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteRouteWithChildren
   '/app/characters': typeof AppCharactersRouteWithChildren
+  '/app/practice-setup': typeof AppPracticeSetupRoute
   '/characters': typeof CharactersIndexRoute
   '/app/characters/$char': typeof AppCharactersCharRoute
   '/app/dashboard': typeof AppDashboardIndexRoute
-  '/app/practice': typeof AppPracticeIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app': typeof AppRouteRouteWithChildren
   '/app/characters': typeof AppCharactersRouteWithChildren
+  '/app/practice-setup': typeof AppPracticeSetupRoute
   '/characters': typeof CharactersIndexRoute
   '/app/characters/$char': typeof AppCharactersCharRoute
   '/app/dashboard': typeof AppDashboardIndexRoute
-  '/app/practice': typeof AppPracticeIndexRoute
 }
 
 export interface FileRoutesById {
@@ -174,10 +174,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/app': typeof AppRouteRouteWithChildren
   '/app/characters': typeof AppCharactersRouteWithChildren
+  '/app/practice-setup': typeof AppPracticeSetupRoute
   '/characters/': typeof CharactersIndexRoute
   '/app/characters/$char': typeof AppCharactersCharRoute
   '/app/dashboard/': typeof AppDashboardIndexRoute
-  '/app/practice/': typeof AppPracticeIndexRoute
 }
 
 export interface FileRouteTypes {
@@ -186,28 +186,28 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/app/characters'
+    | '/app/practice-setup'
     | '/characters'
     | '/app/characters/$char'
     | '/app/dashboard'
-    | '/app/practice'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/app'
     | '/app/characters'
+    | '/app/practice-setup'
     | '/characters'
     | '/app/characters/$char'
     | '/app/dashboard'
-    | '/app/practice'
   id:
     | '__root__'
     | '/'
     | '/app'
     | '/app/characters'
+    | '/app/practice-setup'
     | '/characters/'
     | '/app/characters/$char'
     | '/app/dashboard/'
-    | '/app/practice/'
   fileRoutesById: FileRoutesById
 }
 
@@ -245,8 +245,8 @@ export const routeTree = rootRoute
       "filePath": "app/route.tsx",
       "children": [
         "/app/characters",
-        "/app/dashboard/",
-        "/app/practice/"
+        "/app/practice-setup",
+        "/app/dashboard/"
       ]
     },
     "/app/characters": {
@@ -255,6 +255,10 @@ export const routeTree = rootRoute
       "children": [
         "/app/characters/$char"
       ]
+    },
+    "/app/practice-setup": {
+      "filePath": "app/practice-setup.tsx",
+      "parent": "/app"
     },
     "/characters/": {
       "filePath": "characters/index.tsx"
@@ -265,10 +269,6 @@ export const routeTree = rootRoute
     },
     "/app/dashboard/": {
       "filePath": "app/dashboard/index.tsx",
-      "parent": "/app"
-    },
-    "/app/practice/": {
-      "filePath": "app/practice/index.tsx",
       "parent": "/app"
     }
   }

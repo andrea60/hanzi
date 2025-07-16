@@ -42,3 +42,10 @@ export const useAuth = () => {
 
   return { user, signIn, signOut: signOutUser };
 };
+
+export const getAuthenticatedUser = () => {
+  if (!auth.currentUser) {
+    throw new Error("User is not authenticated");
+  }
+  return auth.currentUser;
+};

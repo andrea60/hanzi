@@ -7,6 +7,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { auth } from "../../firebase/firebase.config";
 import { HanziDataSetProvider } from "../../state/database/HanziDataSetProvider";
+import { useAuth } from "../../auth/useAuth";
 
 export const Route = createFileRoute("/app")({
   component: RouteComponent,
@@ -21,6 +22,11 @@ export const Route = createFileRoute("/app")({
 });
 
 function RouteComponent() {
+  const { user } = useAuth();
+  if (!user)
+    return (
+      <div className="flex items-center justify-center h-full">Loading...</div>
+    );
   return (
     <HanziDataSetProvider>
       <div className="flex flex-col h-full relative bg-neutral ">
@@ -34,7 +40,7 @@ function RouteComponent() {
           <NavigationBar
             links={[
               { to: "/app/dashboard", icon: ListBulletIcon, label: "Recipes" },
-              { to: "/app/practice", icon: PlusIcon, label: "Practice" },
+              { to: "/app/practice-setup", icon: PlusIcon, label: "Practice" },
               {
                 to: "/app/characters",
                 icon: MagnifyingGlassIcon,
