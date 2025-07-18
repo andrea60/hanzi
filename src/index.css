@@ -6,6 +6,10 @@
 @source inline("bg-success/{{0..100..5}}");
 @source inline("bg-warning/{{0..100..5}}");
 
+html {
+   overscroll-behavior: none;
+}
+
 body, html, #root {
   width:100%;
   height:100%;
