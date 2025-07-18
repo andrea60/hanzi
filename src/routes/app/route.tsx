@@ -40,7 +40,7 @@ function RouteComponent() {
         <div className="bg-base-200 flex-1 overflow-y-auto p-6 pt-4 pb-22 rounded-t-3xl shadow-md">
           <Outlet />
           {session.isRunning && (
-            <Overlay fullWidth>
+            <Overlay>
               <PracticeSession />
             </Overlay>
           )}
