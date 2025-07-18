@@ -8,6 +8,9 @@ import {
 import { auth } from "../../firebase/firebase.config";
 import { HanziDataSetProvider } from "../../state/database/HanziDataSetProvider";
 import { useAuth } from "../../auth/useAuth";
+import { usePracticeSession } from "../../state/practice-session/usePracticeSession";
+import { Overlay } from "../../components/modal/Overlay";
+import { PracticeSession } from "../../components/practice-session/PracticeSession";
 
 export const Route = createFileRoute("/app")({
   component: RouteComponent,
@@ -23,6 +26,7 @@ export const Route = createFileRoute("/app")({
 
 function RouteComponent() {
   const { user } = useAuth();
+  const session = usePracticeSession();
   if (!user)
     return (
       <div className="flex items-center justify-center h-full">Loading...</div>
@@ -35,6 +39,11 @@ function RouteComponent() {
         </div>
         <div className="bg-base-200 flex-1 overflow-y-auto p-6 pt-4 pb-22 rounded-t-3xl shadow-md">
           <Outlet />
+          {session.isRunning && (
+            <Overlay fullWidth>
+              <PracticeSession />
+            </Overlay>
+          )}
         </div>
         <div className="bg-base-100 fixed bottom-0 w-full shadow-lg rounded-t-3xl pt-2">
           <NavigationBar

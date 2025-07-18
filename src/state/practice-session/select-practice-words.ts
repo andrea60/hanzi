@@ -1,9 +1,7 @@
 import { db } from "../database/database.db";
 
-export const selectPracticeWords = async () => {
+export const selectPracticeWords = async (numWords: number) => {
   const favs = await db.favourites.toArray();
-
-  const numWords = Math.floor(favs.length * 0.5);
 
   return shuffleArray(favs.map((fav) => fav.word)).slice(0, numWords);
 };

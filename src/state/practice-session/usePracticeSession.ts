@@ -2,8 +2,7 @@ import { useAtom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 import { selectPracticeWords } from "./select-practice-words";
 import { updateWordStats } from "../database/commands/updateWordStats";
-import { useRequiredUser } from "../../auth/useAuth";
-
+import { getAuthenticatedUser } from "../../auth/useAuth";
 export type WordPracticeStats = {
   word: string;
   confidence: number;
@@ -24,14 +23,13 @@ const sessionAtom = atomWithStorage<PracticeSessionState | undefined>(
 );
 
 export const usePracticeSession = () => {
-  const user = useRequiredUser();
   const [session, setSession] = useAtom(sessionAtom);
 
-  const startSession = async () => {
+  const startSession = async (numWords: number) => {
     if (session) throw new Error("Session already in progress");
 
     // get the random words from the database
-    const words = await selectPracticeWords();
+    const words = await selectPracticeWords(numWords);
 
     setSession({
       id: crypto.randomUUID(),
@@ -55,6 +53,7 @@ export const usePracticeSession = () => {
 
   const closeSession = async () => {
     if (!session) return;
+    const user = getAuthenticatedUser();
 
     await updateWordStats(user.uid, session.completed, session.startTime);
 
@@ -63,6 +62,7 @@ export const usePracticeSession = () => {
 
   const isCompleted = session && session.queue.length === 0;
   const currentWord = session?.queue[0];
+  const isRunning = session !== undefined;
 
   return {
     closeSession,
@@ -70,5 +70,6 @@ export const usePracticeSession = () => {
     markWordComplete,
     isCompleted,
     currentWord,
+    isRunning,
   };
 };

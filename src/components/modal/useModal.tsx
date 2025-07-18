@@ -3,6 +3,7 @@ import { PropsWithChildren } from "react";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import { motion } from "framer-motion";
 import { create } from "zustand";
+import classNames from "classnames";
 type ModalCloseReason = "cancel" | "complete";
 type OpenModalState<TResult = any, TProps = any> = {
   isOpen: true;
@@ -114,15 +115,13 @@ export const ModalRenderer = () => {
   };
 
   return (
-    <Overlay
-      onBackdropClick={handleBackdropClick}
-      fullWidth={modal.mode == "dialog" && (modal.fullWidth ?? false)}
-    >
+    <Overlay onBackdropClick={handleBackdropClick}>
       {modal.mode == "overlay" ? (
         overlayContent
       ) : (
         <DialogModalWrapper
           title={modal.title}
+          fullWidth={modal.mode == "dialog" && (modal.fullWidth ?? false)}
           onCancel={modal.force ? undefined : cancel}
         >
           {overlayContent}
@@ -133,13 +132,19 @@ export const ModalRenderer = () => {
 };
 
 const DialogModalWrapper = (
-  props: PropsWithChildren<{ title: string; onCancel?: () => void }>
+  props: PropsWithChildren<{
+    title: string;
+    onCancel?: () => void;
+    fullWidth: boolean;
+  }>
 ) => {
   return (
     <motion.div
       initial={{ y: 25 }}
       animate={{ y: 0 }}
-      className="card card-sm shadow-xl mx-2"
+      className={classNames("card card-sm shadow-xl mx-2", {
+        "w-full": props.fullWidth,
+      })}
     >
       <div className="card-body">
         <h1 className="card-title flex justify-between">
