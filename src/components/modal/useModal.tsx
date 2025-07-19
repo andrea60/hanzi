@@ -115,7 +115,7 @@ export const ModalRenderer = () => {
   };
 
   return (
-    <Overlay onBackdropClick={handleBackdropClick}>
+    <Overlay onBackdropClick={handleBackdropClick} zIndex={20}>
       {modal.mode == "overlay" ? (
         overlayContent
       ) : (

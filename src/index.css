@@ -32,6 +32,10 @@ body, html, #root {
   animation: fadeIn ease-in-out .15s;
 }
 
+.pb-safearea {
+  padding-bottom: calc((var(--spacing) * 2) + env(safe-area-inset-bottom));
+}
+
 @keyframes fadeIn {
   0% {
     opacity: 0;

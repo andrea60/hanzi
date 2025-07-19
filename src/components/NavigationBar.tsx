@@ -56,5 +56,9 @@ export const NavigationBar = ({ links }: Props) => {
     [links, location.pathname]
   );
 
-  return <nav className="p-2 w-full flex justify-around">{linkElements}</nav>;
+  return (
+    <nav className="p-2 w-full flex justify-around pb-safearea">
+      {linkElements}
+    </nav>
+  );
 };

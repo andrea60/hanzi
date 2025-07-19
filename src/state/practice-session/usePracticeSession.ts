@@ -60,6 +60,10 @@ export const usePracticeSession = () => {
     setSession(undefined);
   };
 
+  const discardSession = () => {
+    setSession(undefined);
+  };
+
   const isCompleted = session && session.queue.length === 0;
   const currentWord = session?.queue[0];
   const isRunning = session !== undefined;
@@ -68,6 +72,7 @@ export const usePracticeSession = () => {
     closeSession,
     startSession,
     markWordComplete,
+    discardSession,
     isCompleted,
     currentWord,
     isRunning,
