@@ -1,39 +1,42 @@
 import { useEffect, useMemo, useState } from "react";
+import { WordPracticeData } from "../../state/practice-session/usePracticeSession";
+import classNames from "classnames";
 
 type Props = {
-  chars: string[];
-  pinyin: string[];
+  wordData: WordPracticeData;
 };
-export const WordPractice = ({ chars, pinyin }: Props) => {
-  const [charIdx, setCharIdx] = useResettableState(() => 0, [chars]);
+export const WordPractice = ({ wordData }: Props) => {
+  const [stepIdx, setStepIdx] = useResettableState(() => 0, [wordData]);
 
-  const currentChar = useMemo(() => chars[charIdx], [chars, charIdx]);
-
-  if (chars.length > 1) {
-    // Multi character word
-    return (
-      <div role="tablist" className="tabs tabs-border">
-        {chars.map((x, idx) => (
-          <a role="tab" className="tab" key={x}>
-            {pinyin[idx]}
-          </a>
+  return (
+    <div className="flex flex-row justify-center">
+      <ul className="menu menu-horizontal menu-sm p-1.5 bg-base-200 rounded-box">
+        {wordData.steps.map((step, idx) => (
+          <li key={step.char} className="">
+            <a
+              className={classNames("min-w-16 justify-center", {
+                "menu-active": idx === stepIdx,
+              })}
+              onClick={() => setStepIdx(idx)}
+            >
+              {step.pinyin}
+            </a>
+          </li>
         ))}
-      </div>
-    );
-  }
-
-  return <div>todo</div>;
+      </ul>
+    </div>
+  );
 };
 
 const useResettableState = <T,>(
   initialStateFactory: () => T,
   deps: unknown[]
 ) => {
-  const [state, setState] = useState(initialStateFactory());
+  const [state, setState] = useState(() => initialStateFactory());
 
   useEffect(() => {
     setState(initialStateFactory());
-  }, [deps]);
+  }, [...deps]);
 
   return [state, setState] as const;
 };

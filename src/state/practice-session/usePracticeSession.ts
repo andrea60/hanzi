@@ -3,14 +3,27 @@ import { atomWithStorage } from "jotai/utils";
 import { selectPracticeWords } from "./select-practice-words";
 import { updateWordStats } from "../database/commands/updateWordStats";
 import { getAuthenticatedUser } from "../../auth/useAuth";
+
 export type WordPracticeStats = {
   word: string;
   confidence: number;
 };
 
+export type WordPracticeStepData = {
+  char: string;
+  pinyin: string;
+  strokeData: unknown;
+};
+export type WordPracticeData = {
+  word: string;
+  pinyin: string;
+  steps: WordPracticeStepData[];
+  definitions: string[];
+};
+
 type PracticeSessionState = {
   id: string;
-  queue: string[];
+  queue: WordPracticeData[];
   startTime: Date;
   completed: WordPracticeStats[];
 };

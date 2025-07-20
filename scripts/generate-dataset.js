@@ -4,6 +4,8 @@ import { fileURLToPath } from "url";
 import toPinyinTone from "pinyin-tone";
 import { exec } from "child_process";
 
+const distinct = (input) => Array.from(new Set(input).values());
+
 const [, , versionStr, remoteFlag] = process.argv;
 if (!versionStr || isNaN(Number(versionStr)))
   throw new Error(
@@ -49,7 +51,7 @@ function readCedict(file) {
       entries.push({
         simplified,
         definitions: definitions.split("/").filter((d) => d),
-        pinyin: toPinyinTone(pinyin),
+        pinyin: toPinyinTone(pinyin.toLowerCase()),
       });
     } else console.warn("Could not parse line: '", line, "'");
   }
@@ -76,6 +78,8 @@ const strokesData = readAsJson("strokes.json");
 const stats = {
   missingWords: 0,
   mappedWords: 0,
+  multiplePinyin: 0,
+  unmatchingPinyinWord: 0,
 };
 
 const cedictData = readCedict("cedict_ts.u8");
@@ -104,10 +108,34 @@ for (const entry of cedictData) {
     defs: [],
   };
 
-  dictionaryData[entry.simplified] = {
-    pinyin: [...existingEntry.pinyin, entry.pinyin],
+  const newEntry = {
+    pinyin: distinct([...existingEntry.pinyin, entry.pinyin]),
     defs: [...existingEntry.defs, ...entry.definitions],
   };
+
+  dictionaryData[entry.simplified] = newEntry;
+
+  if (newEntry.pinyin.length > 1) {
+    stats.multiplePinyin++;
+  }
+
+  const pinyinCount = newEntry.pinyin[0].split(" ").length;
+  if (newEntry.pinyin.some((p) => p.split(" ").length !== pinyinCount)) {
+    console.error(
+      `Word ${entry.simplified} has multiple pinyins with different lengths. Pinyins: ${newEntry.pinyin.join(", ")}`
+    );
+    throw new Error("Word has non matching pinyin count");
+  }
+
+  const wordCharsCount = entry.simplified.split("").length;
+  const pinyinsCount = newEntry.pinyin[0].split(" ").length;
+  if (wordCharsCount !== pinyinsCount) {
+    console.error(
+      `Word ${newEntry.simplified} has unmatching strokes and pinyin counts`,
+      newEntry
+    );
+    stats.unmatchingPinyinWord++;
+  }
 
   stats.mappedWords++;
 }
@@ -120,6 +148,10 @@ Object.entries(strokesData).forEach(([character, strokes]) => {
 
 console.log(
   `Mapped ${stats.mappedWords} characters with pinyin and stroke data, missing strokeData for ${stats.missingWords} characters.`
+);
+console.log(`Words with multiple pronounciations: ${stats.multiplePinyin}`);
+console.error(
+  `Words with mismatching pinyin and strokes: ${stats.unmatchingPinyinWord}`
 );
 
 // write the output
