@@ -15,6 +15,8 @@ export default defineConfig({
     VitePWA({
       registerType: "prompt",
       manifest: {
+        short_name: "Hanzi Trainer",
+        description: "Hanzi Practicing Companion",
         background_color: "#E4D8B4",
         theme_color: "#56524C",
         icons: [{ src: "pwa-144.png", sizes: "144x144" }],
