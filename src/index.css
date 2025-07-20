@@ -45,9 +45,6 @@ body, html, #root {
   }
 }
 
-
-
-
 @plugin "daisyui/theme" {
   name: "neutral-1";
   default: false;
@@ -84,6 +81,13 @@ body, html, #root {
 }
 
 
+@font-face {
+  font-family: "Ma Shan Zheng";
+  src:url("/MaShanZheng-Regular.ttf")
+}
+.mashanzheng {
+  font-family: "Ma Shan Zheng";
+}
 
 @plugin "daisyui/theme" {
   name: "retro";

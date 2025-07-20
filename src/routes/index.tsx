@@ -26,7 +26,7 @@ function RouteComponent() {
 
   return (
     <div className=" p-4 h-full w-full flex flex-col items-center justify-center">
-      <h1 className="font-extrabold text-4xl mb-1">Hanzi Trainer</h1>
+      <h1 className="font-extrabold text-6xl mb-1 mashanzheng">练汉字</h1>
       <h2 className="font-serif">Hanzi character writing training app</h2>
       <div className="card card-border card-sm w-full mt-6 shadow-xs">
         <div className="card-body">
