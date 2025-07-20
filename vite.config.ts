@@ -19,7 +19,7 @@ export default defineConfig({
         description: "Hanzi Practicing Companion",
         background_color: "#E4D8B4",
         theme_color: "#56524C",
-        icons: [{ src: "pwa-144.png", sizes: "144x144" }],
+        icons: [{ src: "pwa-256.png", sizes: "256x256" }],
       },
     }),
   ],

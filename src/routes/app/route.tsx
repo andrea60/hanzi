@@ -11,6 +11,7 @@ import { useAuth } from "../../auth/useAuth";
 import { usePracticeSession } from "../../state/practice-session/usePracticeSession";
 import { Overlay } from "../../components/modal/Overlay";
 import { PracticeSession } from "../../components/practice-session/PracticeSession";
+import { useCurrentPageTitle } from "../../utils/PageTitleProvider";
 
 export const Route = createFileRoute("/app")({
   component: RouteComponent,
@@ -27,6 +28,7 @@ export const Route = createFileRoute("/app")({
 function RouteComponent() {
   const { user } = useAuth();
   const session = usePracticeSession();
+  const title = useCurrentPageTitle();
   if (!user)
     return (
       <div className="flex items-center justify-center h-full">Loading...</div>
@@ -34,9 +36,11 @@ function RouteComponent() {
   return (
     <HanziDataSetProvider>
       <div className="flex flex-col h-full relative bg-neutral ">
-        <div className="p-4 px-6 text-neutral-content">
-          <h1 className="font-extrabold text-2xl">
-            <span className="mashanzheng">练汉字</span> - Hanzi Training
+        <div className="py-3 px-6 text-neutral-content">
+          <h1 className="font-extrabold text-2xl flex items-center">
+            <img src="/icon.svg" className="size-12 inline mr-2" />
+            <span className="mashanzheng">练汉字</span>{" "}
+            {title ? " - " + title : null}
           </h1>
         </div>
         <div className="bg-base-200 flex-1 overflow-y-auto p-6 pt-4 pb-22 rounded-t-3xl shadow-md">

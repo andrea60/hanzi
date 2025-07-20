@@ -4,12 +4,14 @@ import debounce from "lodash.debounce";
 import { useState, useCallback } from "react";
 import { CharactersList } from "../../components/characters/CharactersList";
 import { CharactersSearch } from "../../components/characters/CharactersSearch";
+import { usePageTitle } from "../../utils/PageTitleProvider";
 
 export const Route = createFileRoute("/app/characters")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  usePageTitle("Search Words", []);
   const [searchValue, setSearchValue] = useState<string>();
 
   const handleInputChange = useCallback(

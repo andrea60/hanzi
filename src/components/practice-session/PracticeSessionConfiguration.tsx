@@ -5,9 +5,10 @@ import { BookOpenIcon } from "@heroicons/react/24/outline";
 import { Link } from "@tanstack/react-router";
 import { FaceFrownIcon } from "@heroicons/react/24/outline";
 import { usePracticeSession } from "../../state/practice-session/usePracticeSession";
-import { Overlay } from "../modal/Overlay";
+import { usePageTitle } from "../../utils/PageTitleProvider";
 
 export const PracticeSessionConfiguration = () => {
+  usePageTitle("Practice Session", []);
   const { data: favouritesCount } = useFavouritesCount();
   const { startSession, isRunning } = usePracticeSession();
 
@@ -19,10 +20,6 @@ export const PracticeSessionConfiguration = () => {
   };
   return (
     <div className="flex flex-col h-full">
-      <h1 className="text-2xl mb-2 font-extrabold text-center">
-        <BookOpenIcon className="size-6 inline" /> Start a practice session
-      </h1>
-      <hr className="mb-4" />
       {favouritesCount > 0 ? (
         <SessionConfigurator
           totalWordsCount={favouritesCount}
