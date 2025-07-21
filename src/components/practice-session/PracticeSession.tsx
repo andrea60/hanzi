@@ -35,7 +35,7 @@ export const PracticeSession = () => {
               />
             }
           </h1>
-          <h1 className="text-3xl">{currentWord.pinyin}</h1>
+          <h1 className="text-2xl">{currentWord.pinyin}</h1>
           <p>{currentWord.definitions.join(", ")}</p>
         </div>
         <div className="grow">
@@ -43,8 +43,8 @@ export const PracticeSession = () => {
         </div>
 
         <div className="flex gap-2">
-          <button className="btn btn-dash btn-sm btn-warning grow">Skip</button>
-          <button className="btn btn-sm btn-neutral grow" disabled>
+          <button className="btn btn-dash btn-warning grow">Skip</button>
+          <button className="btn btn-neutral grow" disabled>
             Next
           </button>
         </div>
