@@ -21,7 +21,8 @@ export const HanziCharacterWriter = ({ char, size }: Props) => {
         showCharacter: false,
         showOutline: false,
         drawingColor: "#73350E",
-        drawingWidth: 28,
+        drawingWidth: 50,
+        strokeHighlightSpeed: 3,
         highlightColor: "#F26C67",
         strokeWidth: 4,
         delayBetweenStrokes: 150,
@@ -46,10 +47,6 @@ export const HanziCharacterWriter = ({ char, size }: Props) => {
     writerInstance.current = writer;
   }, [char, containerRef.current]);
 
-  const hint = () => {
-    writerInstance.current?.highlightStroke(1);
-  };
-
   return (
     <>
       <svg
@@ -71,7 +68,6 @@ export const HanziCharacterWriter = ({ char, size }: Props) => {
           stroke="rgba(0, 0, 0, 0.1)"
         />
       </svg>
-      <button onClick={hint}>A</button>
     </>
   );
 };

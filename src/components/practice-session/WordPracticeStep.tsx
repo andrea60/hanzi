@@ -7,7 +7,7 @@ type Props = {
 export const WordPracticeStep = ({ step }: Props) => {
   return (
     <>
-      <HanziCharacterWriter char={step.char} size={250} />
+      <HanziCharacterWriter char={step.char} size={300} />
     </>
   );
 };
