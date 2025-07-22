@@ -23,9 +23,10 @@ export type WordPracticeData = {
 
 type PracticeSessionState = {
   id: string;
+  totalWords: number;
   queue: WordPracticeData[];
   startTime: Date;
-  completed: WordPracticeStats[];
+  completed: Record<string, WordPracticeStats>;
 };
 
 // todo implement atom
@@ -46,7 +47,8 @@ export const usePracticeSession = () => {
 
     setSession({
       id: crypto.randomUUID(),
-      completed: [],
+      totalWords: words.length,
+      completed: {},
       queue: words,
       startTime: new Date(),
     });
@@ -56,10 +58,26 @@ export const usePracticeSession = () => {
     setSession((prev) => {
       if (!prev) return prev;
       const [, ...queue] = prev.queue;
+      const completed = { ...prev.completed };
+      // Add the stats only if they weren't added before. The first stats are the only significant ones
+      if (!completed[stats.word]) completed[stats.word] = stats;
       return {
         ...prev,
-        completed: [...prev.completed, stats],
+        completed: { ...prev.completed, [stats.word]: stats },
         queue,
+      };
+    });
+  };
+
+  const repracticeWord = (stats: WordPracticeStats) => {
+    setSession((prev) => {
+      if (!prev) return prev;
+      const [word, ...queue] = prev.queue;
+
+      return {
+        ...prev,
+        queue: [...queue, word],
+        completed: { ...prev.completed, [stats.word]: stats },
       };
     });
   };
@@ -68,7 +86,11 @@ export const usePracticeSession = () => {
     if (!session) return;
     const user = getAuthenticatedUser();
 
-    await updateWordStats(user.uid, session.completed, session.startTime);
+    await updateWordStats(
+      user.uid,
+      Object.values(session.completed),
+      session.startTime
+    );
 
     setSession(undefined);
   };
@@ -81,13 +103,24 @@ export const usePracticeSession = () => {
   const currentWord = session?.queue[0];
   const isRunning = session !== undefined;
 
+  const progress = session ? getProgress(session) : undefined;
+
   return {
     closeSession,
     startSession,
     markWordComplete,
     discardSession,
+    repracticeWord,
     isCompleted,
     currentWord,
     isRunning,
+    progress,
   };
+};
+
+const getProgress = (state: PracticeSessionState): number => {
+  if (state.totalWords === 0) return 1;
+  const completedCount = state.totalWords - state.queue.length;
+
+  return completedCount / state.totalWords;
 };

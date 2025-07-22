@@ -1,18 +1,25 @@
 import HanziWriter, { CharacterJson } from "hanzi-writer";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { db } from "../../state/database/database.db";
+import { useResettableState } from "../../utils/useResettableState";
+import { ArrowPathIcon, LightBulbIcon } from "@heroicons/react/24/outline";
 
 type Props = {
   char: string;
   size: number;
+  onComplete: (usedHint: boolean, totalMistakes: number) => void;
 };
-export const HanziCharacterWriter = ({ char, size }: Props) => {
+export const HanziCharacterWriter = (props: Props) => {
+  const { char, size } = props;
+  const [currentStroke, setCurrentStroke] = useResettableState(() => 0, [char]);
+  const [hasUsedHint, setHasUsedHint] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
   const containerRef = useRef<SVGSVGElement>(null);
   const writerInstance = useRef<HanziWriter>(null);
 
   useEffect(() => {
-    if (!containerRef.current) return;
-    const writer = HanziWriter.create(
+    if (!containerRef.current || writerInstance.current) return;
+    writerInstance.current = HanziWriter.create(
       containerRef.current as any as HTMLElement,
       char,
       {
@@ -21,8 +28,8 @@ export const HanziCharacterWriter = ({ char, size }: Props) => {
         showCharacter: false,
         showOutline: false,
         drawingColor: "#73350E",
-        drawingWidth: 50,
-        strokeHighlightSpeed: 3,
+        drawingWidth: 44,
+        strokeHighlightSpeed: 1,
         highlightColor: "#F26C67",
         strokeWidth: 4,
         delayBetweenStrokes: 150,
@@ -35,22 +42,34 @@ export const HanziCharacterWriter = ({ char, size }: Props) => {
             throw new Error(`Stroke data for character ${char} not found`);
           return strokeData?.strokes as CharacterJson;
         },
+        onCorrectStroke: (data) => {
+          setCurrentStroke(data.strokeNum + 1);
+        },
+        onComplete: (summary) => {
+          props.onComplete(hasUsedHint, summary.totalMistakes);
+          setIsCompleted(true);
+        },
       }
     );
 
-    writer.quiz({
-      onCorrectStroke: (data) => {
-        console.log(data.strokeNum);
-      },
-    });
-
-    writerInstance.current = writer;
+    writerInstance.current.quiz();
   }, [char, containerRef.current]);
 
+  const showNextStroke = () => {
+    writerInstance.current?.highlightStroke(currentStroke);
+    setHasUsedHint(true);
+  };
+
+  const reset = () => {
+    writerInstance.current?.cancelQuiz();
+    writerInstance.current?.quiz();
+    setCurrentStroke(0);
+  };
+
   return (
-    <>
+    <div>
       <svg
-        className="border border-base-300 bg-base-200 rounded-xl"
+        className="border border-base-300 bg-base-200 rounded-xl block"
         ref={containerRef}
       >
         <line
@@ -68,6 +87,19 @@ export const HanziCharacterWriter = ({ char, size }: Props) => {
           stroke="rgba(0, 0, 0, 0.1)"
         />
       </svg>
-    </>
+      <div className="flex flex-row mt-2 justify-between">
+        <button
+          className="btn btn-sm btn-ghost"
+          onClick={showNextStroke}
+          disabled={isCompleted}
+        >
+          <LightBulbIcon className="size-4" />
+          Hint
+        </button>
+        <button className="btn btn-sm btn-ghost" onClick={reset}>
+          Reset <ArrowPathIcon className="size-4" />
+        </button>
+      </div>
+    </div>
   );
 };

@@ -3,11 +3,17 @@ import { HanziCharacterWriter } from "../hanzi-writer/HanziCharacterWriter";
 
 type Props = {
   step: WordPracticeStepData;
+  size: number;
+  onComplete: (usedHint: boolean, totalMistakes: number) => void;
 };
-export const WordPracticeStep = ({ step }: Props) => {
+export const WordPracticeStep = ({ onComplete, size, step }: Props) => {
   return (
     <>
-      <HanziCharacterWriter char={step.char} size={300} />
+      <HanziCharacterWriter
+        char={step.char}
+        onComplete={onComplete}
+        size={size}
+      />
     </>
   );
 };
