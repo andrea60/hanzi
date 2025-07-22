@@ -63,11 +63,12 @@ export const HanziCharacterWriter = (props: Props) => {
   const reset = () => {
     writerInstance.current?.cancelQuiz();
     writerInstance.current?.quiz();
+    setIsCompleted(false);
     setCurrentStroke(0);
   };
 
   return (
-    <div>
+    <>
       <svg
         className="border border-base-300 bg-base-200 rounded-xl block"
         ref={containerRef}
@@ -100,6 +101,6 @@ export const HanziCharacterWriter = (props: Props) => {
           Reset <ArrowPathIcon className="size-4" />
         </button>
       </div>
-    </div>
+    </>
   );
 };

@@ -9,15 +9,10 @@ export type WordPracticeStats = {
   confidence: number;
 };
 
-export type WordPracticeStepData = {
-  char: string;
-  pinyin: string;
-  strokeData: unknown;
-};
 export type WordPracticeData = {
+  uuid:string;
   word: string;
   pinyin: string;
-  steps: WordPracticeStepData[];
   definitions: string[];
 };
 
@@ -32,7 +27,7 @@ type PracticeSessionState = {
 // todo implement atom
 
 const sessionAtom = atomWithStorage<PracticeSessionState | undefined>(
-  "current-session",
+  "hanzi-current-session",
   undefined
 );
 
@@ -76,7 +71,7 @@ export const usePracticeSession = () => {
 
       return {
         ...prev,
-        queue: [...queue, word],
+        queue: [...queue, {...word, uuid: crypto.randomUUID()}],
         completed: { ...prev.completed, [stats.word]: stats },
       };
     });

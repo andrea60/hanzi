@@ -1,92 +1,60 @@
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { WordPracticeData } from "../../state/practice-session/usePracticeSession";
-import classNames from "classnames";
-import { WordPracticeStep } from "./WordPracticeStep";
+import { usePracticeSession } from "../../state/practice-session/usePracticeSession";
+import { HanziWordWriter } from "../hanzi-writer/HanziWordWriter";
 import { useResettableState } from "../../utils/useResettableState";
-import debounce from "lodash.debounce";
+import { ArrowPathIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 
-type Props = {
-  wordData: WordPracticeData;
-  onComplete: () => void;
-};
-export const WordPractice = ({ wordData, onComplete }: Props) => {
-  const stepContainer = useRef<HTMLDivElement>(null);
-  const [containerSize, setContainerSize] = useState<number>();
-  const [stepIdx, setStepIdx] = useState(0);
-  const [stepStates, setStepStates] = useState<boolean[]>(
-    wordData.steps.map(() => false)
-  );
+export const WordPractice = () => {
+  const { currentWord, markWordComplete, repracticeWord } =
+    usePracticeSession();
+  const [wordCompleted, setWordCompleted] = useResettableState(false, [
+    currentWord,
+  ]);
+  const handleComplete = () => {
+    setWordCompleted(true);
+  };
 
-  const multiStepWord = wordData.steps.length > 1;
+  const moveToNext = () => {
+    if (!currentWord) throw new Error("There is not current word in the quiz");
+    markWordComplete({ word: currentWord.word, confidence: 1 });
+  };
+  const practiceAgain = () => {
+    if (!currentWord) throw new Error("There is not current word in the quiz");
+    repracticeWord({ word: currentWord.word, confidence: 1 });
+  };
 
-  useLayoutEffect(() => {
-    if (!stepContainer.current) return;
-    setContainerSize(stepContainer.current?.clientWidth);
-  }, []);
-
-  const handleStepComplete = useCallback(
-    debounce((step: number) => {
-      setStepStates((steps) => {
-        const newSteps = [...steps];
-        newSteps[step] = true;
-        return newSteps;
-      });
-
-      // Move to next step, if any
-      if (step < wordData.steps.length - 1) setStepIdx((s) => s + 1);
-    }, 1500),
-    [wordData]
-  );
-
-  useEffect(() => {
-    const isCompleted = !stepStates.some((s) => s === false);
-    if (isCompleted) onComplete();
-  }, [stepStates]);
-
+  if (!currentWord) return;
   return (
-    <>
-      {multiStepWord && (
-        <div className="flex flex-row justify-center mb-4">
-          <ul className="menu menu-horizontal p-1.5 bg-base-200 rounded-box">
-            {wordData.steps.map((step, idx) => (
-              <li key={step.char} className="">
-                <a
-                  className={classNames("min-w-16 justify-center", {
-                    "menu-active": idx === stepIdx,
-                  })}
-                  onClick={() => setStepIdx(idx)}
-                >
-                  {step.pinyin}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-      <div ref={stepContainer}>
-        {containerSize &&
-          wordData.steps.map((s, idx) => (
-            <div
-              key={s.char}
-              className={classNames(
-                idx === stepIdx ? "flex justify-center" : "hidden"
-              )}
-            >
-              <WordPracticeStep
-                step={s}
-                size={Math.min(containerSize, 350)}
-                onComplete={() => handleStepComplete(idx)}
-              />
-            </div>
-          ))}
+    <div className="grow flex flex-col">
+      <div>
+        <h1 className="text-2xl">{currentWord.pinyin}</h1>
+        <p className="text-xs h-6 whitespace-nowrap overflow-hidden text-ellipsis">
+          {currentWord.definitions.join(", ")}
+        </p>
       </div>
-    </>
+      <div className="grow">
+        <HanziWordWriter
+          key={currentWord.uuid}
+          word={currentWord.word}
+          onComplete={handleComplete}
+        />
+      </div>
+
+      <div className="flex gap-2 text-sm">
+        <button
+          className="btn btn-warning btn-dash flex-1"
+          onClick={practiceAgain}
+          disabled={!wordCompleted}
+        >
+          <ArrowPathIcon className="size-4" /> Try Again
+        </button>
+        <button
+          className="btn btn-success flex-1"
+          onClick={moveToNext}
+          disabled={!wordCompleted}
+        >
+          <CheckCircleIcon className="size-4" /> Learned
+        </button>
+      </div>
+    </div>
   );
 };
