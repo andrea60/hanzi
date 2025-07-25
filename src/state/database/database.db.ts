@@ -27,19 +27,29 @@ export type WordStatRow = {
   userId: string;
   practiceCount: number;
   lastPracticed: Date;
-  avgConfidence: number;
+  avgAccuracy: number;
 };
 
+export type SessionRow = {
+  id: string;
+  userId: string;
+  timestamp: Date;
+  avgAccuracy: number;
+  words: string[];
+};
 export const db = new Dexie("hanzi") as Dexie & {
   strokeData: Dexie.Table<StrokeDataRow>;
   dictionary: Dexie.Table<DictionaryRow>;
   versions: Dexie.Table<HanziVersionRow>;
   favourites: Dexie.Table<UserFavouriteRow>;
   wordStats: Dexie.Table<WordStatRow>;
+  sessions: Dexie.Table<SessionRow>;
 };
 db.version(1).stores({
   strokeData: "char",
   dictionary: "word, searchablePinyin",
   versions: "version, date",
   favourites: "[word+userId], userId",
+  wordStats: "[word+userId], userId",
+  sessions: "[id+userId], userId",
 });

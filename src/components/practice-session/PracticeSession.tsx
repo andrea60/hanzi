@@ -2,9 +2,10 @@ import { XMarkIcon } from "@heroicons/react/24/solid";
 import { usePracticeSession } from "../../state/practice-session/usePracticeSession";
 import { useConfirm } from "../modal/useConfirm";
 import { WordPractice } from "./WordPractice";
+import { EndSessionReport } from "./EndSessionReport";
 
 export const PracticeSession = () => {
-  const { isCompleted, discardSession, progress } = usePracticeSession();
+  const { isCompleted, discardSession } = usePracticeSession();
   const confirm = useConfirm();
 
   const handleExitClick = async () => {
@@ -19,22 +20,16 @@ export const PracticeSession = () => {
   };
 
   return (
-    <div className="card h-full w-full">
-      <div className="card-body">
-        <div>
-          <h1 className="card-title flex justify-between pb-2">
-            Practice Session
-            {
-              <XMarkIcon
-                role="button"
-                className="size-6"
-                onClick={handleExitClick}
-              />
-            }
-          </h1>
-          <progress className="progress w-full" value={progress} max="1" />
-        </div>
-        {!isCompleted ? <WordPractice /> : null}{" "}
+    <div className="rounded-lg p-6 h-full w-full bg-base-200 flex flex-col">
+      {!isCompleted && (
+        <XMarkIcon
+          role="button"
+          className="size-4 mb-2"
+          onClick={handleExitClick}
+        />
+      )}
+      <div className="grow">
+        {!isCompleted ? <WordPractice /> : <EndSessionReport />}
       </div>
     </div>
   );

@@ -8,4 +8,7 @@ export const QueryKey = {
   FavouritesCount() {
     return ["favourites", "count"];
   },
+  AverageSessionAccuracy() {
+    return ["stats", "session", "avg-accuracy"];
+  },
 };

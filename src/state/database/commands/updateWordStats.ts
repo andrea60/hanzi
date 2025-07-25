@@ -22,9 +22,9 @@ export const updateWordStats = async (
         ...statRow,
         practiceCount: statRow.practiceCount + 1,
         lastPracticed: sessionTime,
-        avgConfidence:
-          (statRow.avgConfidence * statRow.practiceCount +
-            sessionWordStats.confidence) /
+        avgAccuracy:
+          (statRow.avgAccuracy * statRow.practiceCount +
+            sessionWordStats.accuracy) /
           (statRow.practiceCount + 1),
       });
     else
@@ -33,7 +33,7 @@ export const updateWordStats = async (
         userId,
         practiceCount: 1,
         lastPracticed: sessionTime,
-        avgConfidence: sessionWordStats.confidence,
+        avgAccuracy: sessionWordStats.accuracy,
       });
   }
 

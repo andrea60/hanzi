@@ -3,14 +3,15 @@ import { atomWithStorage } from "jotai/utils";
 import { selectPracticeWords } from "./select-practice-words";
 import { updateWordStats } from "../database/commands/updateWordStats";
 import { getAuthenticatedUser } from "../../auth/useAuth";
+import { useMemo } from "react";
 
 export type WordPracticeStats = {
   word: string;
-  confidence: number;
+  accuracy: number;
 };
 
 export type WordPracticeData = {
-  uuid:string;
+  uuid: string;
   word: string;
   pinyin: string;
   definitions: string[];
@@ -71,7 +72,7 @@ export const usePracticeSession = () => {
 
       return {
         ...prev,
-        queue: [...queue, {...word, uuid: crypto.randomUUID()}],
+        queue: [...queue, { ...word, uuid: crypto.randomUUID() }],
         completed: { ...prev.completed, [stats.word]: stats },
       };
     });
@@ -99,6 +100,10 @@ export const usePracticeSession = () => {
   const isRunning = session !== undefined;
 
   const progress = session ? getProgress(session) : undefined;
+  const stats = useMemo(
+    () => (session ? Object.values(session.completed) : undefined),
+    [session?.completed]
+  );
 
   return {
     closeSession,
@@ -110,6 +115,7 @@ export const usePracticeSession = () => {
     currentWord,
     isRunning,
     progress,
+    stats,
   };
 };
 

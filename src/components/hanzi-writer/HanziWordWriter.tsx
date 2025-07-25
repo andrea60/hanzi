@@ -8,11 +8,16 @@ import {
 } from "react";
 import classNames from "classnames";
 import debounce from "lodash.debounce";
-import { HanziCharacterWriter } from "../hanzi-writer/HanziCharacterWriter";
+import {
+  HanziWriterReport,
+  HanziCharacterWriter,
+} from "../hanzi-writer/HanziCharacterWriter";
+import { useResettableState } from "../../utils/useResettableState";
+import { getAccuracy } from "./get-accuracy";
 
 type Props = {
   word: string;
-  onComplete: () => void;
+  onComplete: (accuracy: number) => void;
 };
 export const HanziWordWriter = ({ word, onComplete }: Props) => {
   const stepContainer = useRef<HTMLDivElement>(null);
@@ -22,6 +27,10 @@ export const HanziWordWriter = ({ word, onComplete }: Props) => {
   const [stepStates, setStepStates] = useState<boolean[]>(
     chars.map(() => false)
   );
+  const [charsAccuracies, setCharsAccuracies] = useResettableState<number[]>(
+    [],
+    [chars]
+  );
 
   useLayoutEffect(() => {
     if (!stepContainer.current) return;
@@ -29,7 +38,9 @@ export const HanziWordWriter = ({ word, onComplete }: Props) => {
   }, []);
 
   const handleStepComplete = useCallback(
-    debounce((step: number) => {
+    debounce((step: number, report: HanziWriterReport) => {
+      setCharsAccuracies((c) => [...c, getAccuracy(report)]);
+
       setStepStates((steps) => {
         const newSteps = [...steps];
         newSteps[step] = true;
@@ -44,7 +55,13 @@ export const HanziWordWriter = ({ word, onComplete }: Props) => {
 
   useEffect(() => {
     const isCompleted = !stepStates.some((s) => s === false);
-    if (isCompleted) onComplete();
+    if (isCompleted) {
+      const avgAccuracy = charsAccuracies.reduce(
+        (c, n) => (c + n) / 2,
+        charsAccuracies[0]
+      );
+      onComplete(avgAccuracy);
+    }
   }, [stepStates]);
 
   return (
@@ -54,8 +71,8 @@ export const HanziWordWriter = ({ word, onComplete }: Props) => {
           <div
             key={char}
             className={classNames(
-              "text-xl font-bold bg-base-200 size-10 border border-base-300 flex items-center justify-center",
-              { "bg-base-300": idx == stepIdx }
+              "text-xl  bg-base-100 size-10 border border-base-300 flex items-center justify-center rounded",
+              { "border-2 border-base-content font-bold": idx == stepIdx }
             )}
             onClick={() => setStepIdx(idx)}
           >
@@ -72,7 +89,7 @@ export const HanziWordWriter = ({ word, onComplete }: Props) => {
             >
               <HanziCharacterWriter
                 char={char}
-                onComplete={() => handleStepComplete(idx)}
+                onComplete={(report) => handleStepComplete(idx, report)}
                 size={containerSize}
               />
             </div>

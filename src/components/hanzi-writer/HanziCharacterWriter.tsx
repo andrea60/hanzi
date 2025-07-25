@@ -3,21 +3,29 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { db } from "../../state/database/database.db";
 import { useResettableState } from "../../utils/useResettableState";
 import { ArrowPathIcon, LightBulbIcon } from "@heroicons/react/24/outline";
+import { useAsyncEffect } from "../../utils/useAsyncEffect";
+
+export type HanziWriterReport = {
+  hints: number;
+  mistakes: number;
+  strokes: number;
+};
 
 type Props = {
   char: string;
   size: number;
-  onComplete: (usedHint: boolean, totalMistakes: number) => void;
+  onComplete: (report: HanziWriterReport) => void;
 };
 export const HanziCharacterWriter = (props: Props) => {
   const { char, size } = props;
   const [currentStroke, setCurrentStroke] = useResettableState(() => 0, [char]);
-  const [hasUsedHint, setHasUsedHint] = useState(false);
+  const [hints, setHints] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
   const containerRef = useRef<SVGSVGElement>(null);
   const writerInstance = useRef<HanziWriter>(null);
+  const strokesNumber = useRef<number>(null);
 
-  useEffect(() => {
+  useAsyncEffect(async () => {
     if (!containerRef.current || writerInstance.current) return;
     writerInstance.current = HanziWriter.create(
       containerRef.current as any as HTMLElement,
@@ -45,19 +53,30 @@ export const HanziCharacterWriter = (props: Props) => {
         onCorrectStroke: (data) => {
           setCurrentStroke(data.strokeNum + 1);
         },
+        onMistake(strokeData) {
+          console.log(strokeData);
+        },
         onComplete: (summary) => {
-          props.onComplete(hasUsedHint, summary.totalMistakes);
+          props.onComplete({
+            hints,
+            mistakes: summary.totalMistakes,
+            strokes: strokesNumber.current!,
+          });
           setIsCompleted(true);
         },
       }
     );
 
+    const { strokes } = await writerInstance.current.getCharacterData();
+    strokesNumber.current = strokes.length;
+
+    // Start the quiz
     writerInstance.current.quiz();
   }, [char, containerRef.current]);
 
   const showNextStroke = () => {
     writerInstance.current?.highlightStroke(currentStroke);
-    setHasUsedHint(true);
+    setHints((x) => x + 1);
   };
 
   const reset = () => {
@@ -70,7 +89,7 @@ export const HanziCharacterWriter = (props: Props) => {
   return (
     <>
       <svg
-        className="border border-base-300 bg-base-200 rounded-xl block"
+        className="border bg-base-100 rounded-xl block border-base-300 shadow-[0_.1rem_.5rem_-.3rem_#0003]"
         ref={containerRef}
       >
         <line
