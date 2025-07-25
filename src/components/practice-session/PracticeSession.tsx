@@ -5,32 +5,29 @@ import { WordPractice } from "./WordPractice";
 import { EndSessionReport } from "./EndSessionReport";
 
 export const PracticeSession = () => {
-  const { isCompleted, discardSession } = usePracticeSession();
+  const session = usePracticeSession();
   const confirm = useConfirm();
 
   const handleExitClick = async () => {
-    if (
-      await confirm({
-        description: "Are you sure you want to quit?",
-        severity: "warning",
-        title: "Quitting?",
-      })
-    )
-      discardSession();
+    if (!session.isRunning) return;
+    const userConfirmation = await confirm({
+      description: "Are you sure you want to quit?",
+      severity: "warning",
+      title: "Quitting?",
+    });
+    if (userConfirmation) session.discardSession();
   };
 
   return (
     <div className="rounded-lg p-6 h-full w-full bg-base-200 flex flex-col">
-      {!isCompleted && (
+      {!session.isCompleted && (
         <XMarkIcon
           role="button"
           className="size-4 mb-2"
           onClick={handleExitClick}
         />
       )}
-      <div className="grow">
-        {!isCompleted ? <WordPractice /> : <EndSessionReport />}
-      </div>
+      {session.isCompleted ? <EndSessionReport /> : <WordPractice />}
     </div>
   );
 };

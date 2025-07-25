@@ -36,6 +36,7 @@ export type SessionRow = {
   timestamp: Date;
   avgAccuracy: number;
   words: string[];
+  timeTakenSeconds: number;
 };
 export const db = new Dexie("hanzi") as Dexie & {
   strokeData: Dexie.Table<StrokeDataRow>;

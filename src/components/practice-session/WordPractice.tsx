@@ -3,11 +3,22 @@ import { HanziWordWriter } from "../hanzi-writer/HanziWordWriter";
 import { useResettableState } from "../../utils/useResettableState";
 import { ArrowPathIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 import { CheckCircleIcon as CheckCircleIconSolid } from "@heroicons/react/24/solid";
-import { motion } from "motion/react";
+import { isMotionComponent, motion } from "motion/react";
 
 export const WordPractice = () => {
-  const { currentWord, markWordComplete, repracticeWord, progress } =
-    usePracticeSession();
+  const {
+    currentWord,
+    markWordComplete,
+    repracticeWord,
+    progress,
+    isRunning,
+    isCompleted,
+  } = usePracticeSession();
+  if (!isRunning || isCompleted)
+    throw new Error(
+      "No active session running. This component should not be rendered"
+    );
+
   const [wordCompleted, setWordCompleted] = useResettableState(false, [
     currentWord,
   ]);
@@ -21,17 +32,20 @@ export const WordPractice = () => {
   };
 
   const moveToNext = () => {
-    if (!currentWord || !accuracy)
-      throw new Error("There is not current word in the quiz");
+    if (!accuracy)
+      throw new Error(
+        "No accuracy data for the current word. This should not happen"
+      );
     markWordComplete({ word: currentWord.word, accuracy });
   };
   const practiceAgain = () => {
-    if (!currentWord || !accuracy)
-      throw new Error("There is not current word in the quiz");
+    if (!accuracy)
+      throw new Error(
+        "No accuracy data for the current word. This should not happen"
+      );
     repracticeWord({ word: currentWord.word, accuracy });
   };
 
-  if (!currentWord) return;
   return (
     <div className="grow flex flex-col">
       <progress className="progress w-full mb-2" value={progress} max="1" />

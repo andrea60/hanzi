@@ -1,6 +1,7 @@
 import {
   ArchiveBoxIcon,
   ArrowDownCircleIcon,
+  ClockIcon,
   TrophyIcon,
 } from "@heroicons/react/24/outline";
 import {
@@ -17,17 +18,20 @@ import { AnimatedNumber } from "../ui/AnimatedNumber";
 import { useAverageSessionAccuracy } from "../../state/database/queries/useAverageAccuracy";
 
 export const EndSessionReport = () => {
-  const { stats, closeSession } = usePracticeSession();
+  const {
+    isCompleted,
+    isRunning,
+    stats,
+    closeSession,
+    avgAccuracy,
+    timeTakenSeconds,
+  } = usePracticeSession();
 
-  if (!stats)
+  if (!isRunning || !isCompleted)
     throw new Error(
       "Unable to render an end session report if no session is active"
     );
 
-  const avgAccuracy = useMemo(
-    () => stats.map((s) => s.accuracy).reduce((c, i) => c + i) / stats.length,
-    [stats]
-  );
   const avgAccuracyPerc = avgAccuracy * 100;
 
   const [best, worst] = useMemo(() => {
@@ -40,6 +44,7 @@ export const EndSessionReport = () => {
 
   const skeleton = <span className="inline-block skeleton h-3 w-18" />;
 
+  const secondsPerWord = timeTakenSeconds / stats.length;
   return (
     <div className="flex flex-col h-full">
       <h1 className="text-3xl font-bold text-center mb-2 pb-2 border-b border-base-300">
@@ -94,7 +99,30 @@ export const EndSessionReport = () => {
               </span>
             </div>
           </WordCard>
-          <div className="col-span-2"></div>
+          <div className="col-span-2">
+            <WordCard>
+              <div className="card-body">
+                <label className="text-base-content/75">Time Taken</label>
+                <div className="flex flex-row gap-2 items-center justify-between">
+                  <div>
+                    <AnimatedNumber
+                      value={timeTakenSeconds / 60}
+                      className="text-4xl mr-1 font-bold"
+                    />
+                    minutes
+                  </div>
+                  <div>
+                    <AnimatedNumber
+                      value={secondsPerWord}
+                      className="text-4xl mr-1 font-bold"
+                    />
+                    sec/word
+                  </div>
+                  <ClockIcon className="size-12" />
+                </div>
+              </div>
+            </WordCard>
+          </div>
         </div>
       </div>
 
@@ -107,9 +135,10 @@ export const EndSessionReport = () => {
 
 const AccuracyComparer = ({ avgAccuracy }: { avgAccuracy: number }) => {
   const { data: prevAvgAccuracy } = useAverageSessionAccuracy();
+  console.log("Rendering AccuracyComparer");
   if (!prevAvgAccuracy) return <p className="skeleton h-3 w-18" />;
 
-  if (isNaN(prevAvgAccuracy))
+  if (prevAvgAccuracy === "unavailable")
     return <div className="text-base-content">First Session</div>;
   if (avgAccuracy >= prevAvgAccuracy)
     return (

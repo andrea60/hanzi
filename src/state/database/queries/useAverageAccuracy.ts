@@ -13,7 +13,7 @@ export const useAverageSessionAccuracy = () => {
         .equals(user.uid)
         .toArray();
 
-      if (sessions.length === 0) return NaN;
+      if (sessions.length === 0) return "unavailable";
 
       return (
         sessions.map((s) => s.avgAccuracy).reduce((c, n) => c + n) /

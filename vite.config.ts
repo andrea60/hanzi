@@ -14,6 +14,7 @@ export default defineConfig({
     cloudflare(),
     VitePWA({
       registerType: "prompt",
+      includeAssets: ["icon.svg", "*.ttf"],
       manifest: {
         short_name: "Hanzi Trainer",
         description: "Hanzi Practicing Companion",

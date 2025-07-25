@@ -10,12 +10,13 @@ import { usePageTitle } from "../../utils/PageTitleProvider";
 export const PracticeSessionConfiguration = () => {
   usePageTitle("Practice Session", []);
   const { data: favouritesCount } = useFavouritesCount();
-  const { startSession, isRunning } = usePracticeSession();
+  const { isRunning, startSession } = usePracticeSession();
 
   if (favouritesCount === undefined) return <p>Loading...</p>;
   if (isRunning) return <RunningSessionPlaceholder />;
 
   const handleOnStart = (numWords: number) => {
+    if (isRunning) return;
     startSession(numWords);
   };
   return (

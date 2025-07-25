@@ -4,6 +4,7 @@ import { selectPracticeWords } from "./select-practice-words";
 import { updateWordStats } from "../database/commands/updateWordStats";
 import { getAuthenticatedUser } from "../../auth/useAuth";
 import { useMemo } from "react";
+import { saveSessionStats } from "../database/commands/saveSessionStats";
 
 export type WordPracticeStats = {
   word: string;
@@ -17,13 +18,27 @@ export type WordPracticeData = {
   definitions: string[];
 };
 
-type PracticeSessionState = {
+type InProgressSessionState = {
+  state: "InProgress";
   id: string;
   totalWords: number;
   queue: WordPracticeData[];
   startTime: Date;
   completed: Record<string, WordPracticeStats>;
 };
+
+type CompletedSessionState = {
+  state: "Completed";
+  id: string;
+  totalWords: number;
+  avgAccuracy: number;
+  timeTakenSeconds: number;
+  stats: WordPracticeStats[];
+  startTime: Date;
+  endTime: Date;
+};
+
+type PracticeSessionState = InProgressSessionState | CompletedSessionState;
 
 // todo implement atom
 
@@ -42,6 +57,7 @@ export const usePracticeSession = () => {
     const words = await selectPracticeWords(numWords);
 
     setSession({
+      state: "InProgress",
       id: crypto.randomUUID(),
       totalWords: words.length,
       completed: {},
@@ -52,11 +68,32 @@ export const usePracticeSession = () => {
 
   const markWordComplete = (stats: WordPracticeStats) => {
     setSession((prev) => {
-      if (!prev) return prev;
+      if (!prev || prev.state !== "InProgress") return prev;
       const [, ...queue] = prev.queue;
       const completed = { ...prev.completed };
       // Add the stats only if they weren't added before. The first stats are the only significant ones
       if (!completed[stats.word]) completed[stats.word] = stats;
+
+      if (queue.length === 0) {
+        const endTime = new Date();
+        const timeTakenSeconds =
+          (endTime.valueOf() - prev.startTime.valueOf()) / 1000;
+
+        const stats = Object.values(prev.completed);
+        const avgAccuracy =
+          stats.map((s) => s.accuracy).reduce((c, n) => c + n) / stats.length;
+        // session completed
+        return {
+          state: "Completed",
+          timeTakenSeconds,
+          avgAccuracy,
+          stats,
+          startTime: prev.startTime,
+          endTime: endTime,
+          id: prev.id,
+          totalWords: stats.length,
+        };
+      }
       return {
         ...prev,
         completed: { ...prev.completed, [stats.word]: stats },
@@ -67,7 +104,7 @@ export const usePracticeSession = () => {
 
   const repracticeWord = (stats: WordPracticeStats) => {
     setSession((prev) => {
-      if (!prev) return prev;
+      if (!prev || prev.state !== "InProgress") return prev;
       const [word, ...queue] = prev.queue;
 
       return {
@@ -79,13 +116,18 @@ export const usePracticeSession = () => {
   };
 
   const closeSession = async () => {
-    if (!session) return;
+    if (!session || session.state !== "Completed") return;
     const user = getAuthenticatedUser();
 
-    await updateWordStats(
-      user.uid,
-      Object.values(session.completed),
-      session.startTime
+    await updateWordStats(user.uid, session.stats, session.startTime);
+
+    await saveSessionStats(
+      session.id,
+      session.startTime,
+      session.timeTakenSeconds,
+      session.avgAccuracy,
+      session.stats.map((s) => s.word),
+      user.uid
     );
 
     setSession(undefined);
@@ -95,31 +137,40 @@ export const usePracticeSession = () => {
     setSession(undefined);
   };
 
-  const isCompleted = session && session.queue.length === 0;
-  const currentWord = session?.queue[0];
-  const isRunning = session !== undefined;
+  if (!session) {
+    return {
+      isRunning: false,
+      startSession,
+    } as const;
+  }
+  if (session.state === "InProgress") {
+    const currentWord = session.queue[0];
 
-  const progress = session ? getProgress(session) : undefined;
-  const stats = useMemo(
-    () => (session ? Object.values(session.completed) : undefined),
-    [session?.completed]
-  );
+    return {
+      markWordComplete,
+      repracticeWord,
+      discardSession,
+      currentWord,
+      progress: getProgress(session),
+      isCompleted: false,
+      isRunning: true,
+    } as const;
+  }
+
+  // completed session
 
   return {
     closeSession,
-    startSession,
-    markWordComplete,
     discardSession,
-    repracticeWord,
-    isCompleted,
-    currentWord,
-    isRunning,
-    progress,
-    stats,
-  };
+    isCompleted: true,
+    isRunning: true,
+    stats: session.stats,
+    avgAccuracy: session.avgAccuracy,
+    timeTakenSeconds: session.timeTakenSeconds,
+  } as const;
 };
 
-const getProgress = (state: PracticeSessionState): number => {
+const getProgress = (state: InProgressSessionState): number => {
   if (state.totalWords === 0) return 1;
   const completedCount = state.totalWords - state.queue.length;
 
