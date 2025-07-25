@@ -142,14 +142,14 @@ const AccuracyComparer = ({ avgAccuracy }: { avgAccuracy: number }) => {
     return <div className="text-base-content">First Session</div>;
   if (avgAccuracy >= prevAvgAccuracy)
     return (
-      <div className="text-success">
-        <ArrowUpCircleIcon className="size-4 inline mr-1" />
+      <div className="text-success font-bold">
+        <ArrowUpCircleIcon className="size-4 inline mr-1 mb-0.5" />
         Increasing
       </div>
     );
   return (
-    <div className="text-error">
-      <ArrowDownCircleIcon className="size-4 inline mr-1" />
+    <div className="text-error font-bold">
+      <ArrowDownCircleIcon className="size-4 inline mr-1 mb-0.5" />
       Decreasing
     </div>
   );

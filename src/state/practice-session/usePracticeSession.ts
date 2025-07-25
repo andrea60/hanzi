@@ -79,9 +79,8 @@ export const usePracticeSession = () => {
         const timeTakenSeconds =
           (endTime.valueOf() - prev.startTime.valueOf()) / 1000;
 
-        const stats = Object.values(prev.completed);
-        const avgAccuracy =
-          stats.map((s) => s.accuracy).reduce((c, n) => c + n) / stats.length;
+        const stats = Object.values(completed);
+        const avgAccuracy = getAvgAccuracy(stats);
         // session completed
         return {
           state: "Completed",
@@ -175,4 +174,10 @@ const getProgress = (state: InProgressSessionState): number => {
   const completedCount = state.totalWords - state.queue.length;
 
   return completedCount / state.totalWords;
+};
+
+const getAvgAccuracy = (stats: WordPracticeStats[]) => {
+  if (stats.length === 1) return stats[0].accuracy;
+
+  return stats.map((s) => s.accuracy).reduce((c, n) => c + n) / stats.length;
 };
