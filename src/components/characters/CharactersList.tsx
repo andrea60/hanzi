@@ -57,7 +57,7 @@ export const CharactersList = () => {
 
   return (
     <div className="grow flex flex-col gap-2">
-      {flatData?.map((word) => <WordCard word={word} />)}
+      {flatData?.map((word) => <WordCard key={word.word} word={word} />)}
 
       {hasNextPage && (
         <button

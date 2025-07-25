@@ -6,6 +6,10 @@ import { Link } from "@tanstack/react-router";
 import { FaceFrownIcon } from "@heroicons/react/24/outline";
 import { usePracticeSession } from "../../state/practice-session/usePracticeSession";
 import { usePageTitle } from "../../utils/PageTitleProvider";
+import { MinusIcon, PlusIcon } from "@heroicons/react/24/solid";
+import { AnimatedNumber } from "../ui/AnimatedNumber";
+import { atomWithStorage } from "jotai/utils";
+import { useAtom } from "jotai";
 
 export const PracticeSessionConfiguration = () => {
   usePageTitle("Practice Session", []);
@@ -32,7 +36,7 @@ export const PracticeSessionConfiguration = () => {
             <FaceFrownIcon className="size-14" />
           </p>
           <p>Your study list is empty</p>
-          <p className="text-xs">
+          <p className="text-xs text-center">
             Find and add words to pracitce practice in the{" "}
             <Link className="text-info font-bold" to="/app/characters">
               Words Search
@@ -44,29 +48,24 @@ export const PracticeSessionConfiguration = () => {
   );
 };
 
+const numWordsAtom = atomWithStorage<number>("session-setup-numwords", 1);
+
 type Props = {
   totalWordsCount: number;
   onStart: (numWords: number) => void;
 };
 const SessionConfigurator = ({ totalWordsCount, onStart }: Props) => {
-  const [wordsPerc, setWordsPerc] = useState(50);
+  const [numWords, setNumWords] = useAtom(numWordsAtom);
 
-  const numWords = Math.round((wordsPerc / 100) * totalWordsCount);
+  const addWordCount = (val: number) => {
+    setNumWords((c) =>
+      c + val < 1 || c + val >= totalWordsCount ? c : c + val
+    );
+  };
+
   return (
     <>
       <div className="flex flex-col gap-4 h-full">
-        <div>
-          <label className="text-xs">How many words?</label>
-          <Slider
-            max={100}
-            min={25}
-            step={25}
-            value={wordsPerc}
-            stepLabelRenderer={(p) => <span>{p.toFixed(0)}%</span>}
-            onChange={setWordsPerc}
-          />
-        </div>
-
         <div>
           <label className="text-xs mb-2">What do you want to practice?</label>
           <div className="tabs tabs-box bg-base-300 justify-center">
@@ -84,6 +83,27 @@ const SessionConfigurator = ({ totalWordsCount, onStart }: Props) => {
               aria-label="Practice Reading"
               disabled
             />
+          </div>
+        </div>
+        <div>
+          <label className="text-xs">How many words?</label>
+          <div className="mt-2 bg-base-100 flex items-center justify-between rounded-r-full rounded-l-full  shadow-[0_.1rem_.5rem_-.3rem_#0003]">
+            <button
+              className="btn btn-ghost btn-xl  rounded-l-full"
+              onClick={() => addWordCount(-1)}
+            >
+              <MinusIcon className="size-6" />
+            </button>
+            <div>
+              <span className="text-4xl font-bold mr-1">{numWords}</span>
+              words
+            </div>
+            <button
+              className="btn btn-ghost btn-xl rounded-r-full"
+              onClick={() => addWordCount(1)}
+            >
+              <PlusIcon className="size-6" />
+            </button>
           </div>
         </div>
 
