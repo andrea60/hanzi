@@ -16,7 +16,7 @@ const accuracyFn = (inputs: {
   hintsPenalty: number;
 }) => {
   return Math.max(
-    0,
+    0.01,
     1 -
       (inputs.mistakes * inputs.mistakesPenalty +
         inputs.hints * inputs.hintsPenalty) /

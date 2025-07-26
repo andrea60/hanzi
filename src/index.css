@@ -89,7 +89,9 @@ body, html, #root {
   font-family: "Ma Shan Zheng";
 }
 
-
+.card-default {
+  @apply bg-base-100 border-base-200 shadow-[0_.1rem_.5rem_-.3rem_#0003];
+}
 
 @plugin "daisyui/theme" {
   name: "retro";

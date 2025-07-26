@@ -11,4 +11,7 @@ export const QueryKey = {
   AverageSessionAccuracy() {
     return ["stats", "session", "avg-accuracy"];
   },
+  SessionsHistory(limit: number) {
+    return ["stats", "session", limit];
+  },
 };

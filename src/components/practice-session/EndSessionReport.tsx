@@ -157,9 +157,5 @@ const AccuracyComparer = ({ avgAccuracy }: { avgAccuracy: number }) => {
 
 type WordCardProps = {};
 const WordCard = ({ children }: PropsWithChildren<WordCardProps>) => {
-  return (
-    <div className="card card-sm card-border border-base-300 shadow-[0_.1rem_.5rem_-.3rem_#0003]">
-      {children}
-    </div>
-  );
+  return <div className="card card-sm card-default">{children}</div>;
 };

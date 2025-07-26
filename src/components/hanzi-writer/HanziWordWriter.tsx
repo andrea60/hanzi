@@ -56,10 +56,8 @@ export const HanziWordWriter = ({ word, onComplete }: Props) => {
   useEffect(() => {
     const isCompleted = !stepStates.some((s) => s === false);
     if (isCompleted) {
-      const avgAccuracy = charsAccuracies.reduce(
-        (c, n) => (c + n) / 2,
-        charsAccuracies[0]
-      );
+      const avgAccuracy =
+        charsAccuracies.reduce((c, n) => c + n) / charsAccuracies.length;
       onComplete(avgAccuracy);
     }
   }, [stepStates]);
