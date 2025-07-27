@@ -1,6 +1,8 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { NavigationBar } from "../../components/NavigationBar";
 import {
+  BookOpenIcon,
+  ChartBarIcon,
   ListBulletIcon,
   MagnifyingGlassIcon,
   PlusIcon,
@@ -54,8 +56,12 @@ function RouteComponent() {
         <div className="bg-base-100 fixed bottom-0 w-full shadow-lg rounded-t-3xl pt-2">
           <NavigationBar
             links={[
-              { to: "/app/dashboard", icon: ListBulletIcon, label: "Recipes" },
-              { to: "/app/practice-setup", icon: PlusIcon, label: "Practice" },
+              { to: "/app/dashboard", icon: ChartBarIcon, label: "Dashboard" },
+              {
+                to: "/app/practice-setup",
+                icon: BookOpenIcon,
+                label: "Practice",
+              },
               {
                 to: "/app/characters",
                 icon: MagnifyingGlassIcon,

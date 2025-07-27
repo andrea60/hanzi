@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useWordsAccuracyStats } from "../../state/database/queries/useWordsStats";
+import { HandThumbUpIcon } from "@heroicons/react/24/solid";
 
 export const BestWordsCard = () => {
   const { data } = useWordsAccuracyStats("best", 3);
@@ -48,7 +49,10 @@ export const BestWordsCard = () => {
 
   return (
     <>
-      <h1 className="mb-1">Your Best Words</h1>
+      <h1 className="mb-1">
+        <HandThumbUpIcon className="size-4 inline text-success" /> Your Best
+        Words
+      </h1>
       <div className="grid grid-cols-3 grid-rows-1 items-end gap-2">
         {notEnoughData ? notEnoughDataPlaceholder : cardsContent}
       </div>

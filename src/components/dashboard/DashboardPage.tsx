@@ -6,7 +6,7 @@ import { WorstWordsCard } from "./WorstWordsCard";
 
 export const DashboardPage = () => {
   return (
-    <div className="grid grid-cols-2 gap-2">
+    <div className="grid grid-cols-2 gap-4 mb-2">
       <WordsCountCard />
       <LastSessionCard />
       <div className="card card-sm card-default col-span-2">

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useWordsAccuracyStats } from "../../state/database/queries/useWordsStats";
+import { HandThumbDownIcon } from "@heroicons/react/24/solid";
 
 export const WorstWordsCard = () => {
   const { data } = useWordsAccuracyStats("worst", 3);
@@ -48,7 +49,10 @@ export const WorstWordsCard = () => {
 
   return (
     <>
-      <h1 className="mb-1">Your Worst Words</h1>
+      <h1 className="mb-1">
+        <HandThumbDownIcon className="size-4 inline text-error" /> Your Worst
+        Words
+      </h1>
       <div className="grid grid-cols-3 grid-rows-1 items-end gap-2">
         {notEnoughData ? notEnoughDataPlaceholder : cardsContent}
       </div>

@@ -35,6 +35,8 @@ export const CharactersList = () => {
   });
 
   const flatData = useMemo(() => data?.pages.flatMap((p) => p.words), [data]);
+
+  const totalCount = useMemo(() => data?.pages[0]?.totalCount, [data]);
   if (isLoading) return <div>Loading...</div>;
 
   const isEmpty = flatData && flatData.length == 0;
@@ -57,6 +59,7 @@ export const CharactersList = () => {
 
   return (
     <div className="grow flex flex-col gap-2">
+      <p>You saved {totalCount} words:</p>
       {flatData?.map((word) => <WordCard key={word.word} word={word} />)}
 
       {hasNextPage && (
