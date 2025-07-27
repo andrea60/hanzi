@@ -14,4 +14,7 @@ export const QueryKey = {
   SessionsHistory(limit: number) {
     return ["stats", "session", limit];
   },
+  WordsAccuracyStats(direction: string, limit: number) {
+    return ["stats", "words", "accuracy", direction, limit];
+  },
 };

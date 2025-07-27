@@ -46,11 +46,11 @@ export const db = new Dexie("hanzi") as Dexie & {
   wordStats: Dexie.Table<WordStatRow>;
   sessions: Dexie.Table<SessionRow>;
 };
-db.version(1).stores({
+db.version(2).stores({
   strokeData: "char",
   dictionary: "word, searchablePinyin",
   versions: "version, date",
   favourites: "[word+userId], userId",
-  wordStats: "[word+userId], userId",
+  wordStats: "[word+userId], userId, [userId+avgAccuracy]",
   sessions: "[id+userId], userId",
 });
