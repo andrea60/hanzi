@@ -5,13 +5,24 @@ import "./index.css";
 // Import the generated route tree
 import { routeTree } from "./routeTree.gen";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { showToast } from "./components/toastr/useToast";
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      refetchOnWindowFocus: false
-    }
-  }
+      refetchOnWindowFocus: false,
+      throwOnError(error) {
+        showToast({
+          content: error.message,
+          type: "time",
+          severity: "error",
+          title: "Un unexpected error occured",
+        });
+
+        return false;
+      },
+    },
+  },
 });
 
 // Create a new router instance

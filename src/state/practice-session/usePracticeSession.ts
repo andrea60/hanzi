@@ -5,6 +5,7 @@ import { updateWordStats } from "../database/commands/updateWordStats";
 import { getAuthenticatedUser } from "../../auth/useAuth";
 import { useMemo } from "react";
 import { saveSessionStats } from "../database/commands/saveSessionStats";
+import { showToast } from "../../components/toastr/useToast";
 
 export type WordPracticeStats = {
   word: string;
@@ -118,16 +119,33 @@ export const usePracticeSession = () => {
     if (!session || session.state !== "Completed") return;
     const user = getAuthenticatedUser();
 
-    await updateWordStats(user.uid, session.stats, session.startTime);
+    try {
+      await updateWordStats(user.uid, session.stats, session.startTime);
 
-    await saveSessionStats(
-      session.id,
-      session.startTime,
-      session.timeTakenSeconds,
-      session.avgAccuracy,
-      session.stats.map((s) => s.word),
-      user.uid
-    );
+      await saveSessionStats(
+        session.id,
+        session.startTime,
+        session.timeTakenSeconds,
+        session.avgAccuracy,
+        session.stats.map((s) => s.word),
+        user.uid
+      );
+    } catch (error) {
+      if (error instanceof Error)
+        showToast({
+          severity: "error",
+          title: "Error occured while trying to save this session",
+          content: `Error: ${error.message}`,
+          type: "sticky",
+        });
+      else
+        showToast({
+          severity: "error",
+          content: "Unknown error occured while trying to save this session",
+          type: "sticky",
+        });
+      return;
+    }
 
     setSession(undefined);
   };

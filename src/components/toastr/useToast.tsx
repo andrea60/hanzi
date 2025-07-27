@@ -85,21 +85,21 @@ type ToastProps = {
 } & Toast;
 const Toast = (toast: ToastProps) => {
   const borderColor = match(toast.severity)
-    .with("default", undefined, () => "border-base-300!")
+    .with("default", undefined, () => "border-base-content!")
     .with("error", () => "border-error!")
     .with("success", () => "border-success!")
     .with("warning", () => "border-warning!")
     .exhaustive();
 
   const bgColor = match(toast.severity)
-    .with("default", undefined, () => "bg-base-100")
+    .with("default", undefined, () => "bg-base-300")
     .with("error", () => "bg-error")
     .with("success", () => "bg-success")
     .with("warning", () => "bg-warning")
     .exhaustive();
 
   const iconColor = match(toast.severity)
-    .with("default", undefined, () => "text-base-content")
+    .with("default", undefined, () => "text-neutral-content")
     .with("error", () => "text-error-content")
     .with("success", () => "text-success-content")
     .with("warning", () => "text-warning-content")
@@ -111,9 +111,10 @@ const Toast = (toast: ToastProps) => {
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: -100, opacity: 0 }}
       className={cn(
-        "py-2 px-2 rounded-full shadow text-sm w-full backdrop-blur-2xl flex items-center gap-2 border!",
+        "py-2 px-2 rounded-full shadow text-sm w-full backdrop-blur-2xl flex items-center gap-2 border! ",
         borderColor,
-        bgColor + "/45"
+        bgColor + "/45",
+        iconColor
       )}
     >
       {toast.icon && (

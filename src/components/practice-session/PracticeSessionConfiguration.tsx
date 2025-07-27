@@ -10,12 +10,14 @@ import { MinusIcon, PlusIcon } from "@heroicons/react/24/solid";
 import { AnimatedNumber } from "../ui/AnimatedNumber";
 import { atomWithStorage } from "jotai/utils";
 import { useAtom } from "jotai";
+import { ErrorHandler } from "../ui/ErrorHandler";
 
 export const PracticeSessionConfiguration = () => {
   usePageTitle("Practice Session", []);
-  const { data: favouritesCount } = useFavouritesCount();
+  const { data: favouritesCount, error } = useFavouritesCount();
   const { isRunning, startSession } = usePracticeSession();
 
+  if (error) return <ErrorHandler error={error} />;
   if (favouritesCount === undefined) return <p>Loading...</p>;
   if (isRunning) return <RunningSessionPlaceholder />;
 

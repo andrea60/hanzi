@@ -2,6 +2,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { db } from "../../state/database/database.db";
 import { WordCard } from "./WordCard";
 import { useMemo } from "react";
+import { ErrorHandler } from "../ui/ErrorHandler";
 
 const fetchWords = async (
   search: string | undefined,
@@ -29,29 +30,21 @@ type Props = {
   search: string | undefined;
 };
 export const CharactersSearch = ({ search }: Props) => {
-  const {
-    data,
-    isLoading,
-    isFetching,
-    error,
-    isSuccess,
-    hasNextPage,
-    fetchNextPage,
-  } = useInfiniteQuery({
-    queryKey: ["characters", search],
-    queryFn: ({ pageParam = 0 }) => fetchWords(search, pageParam, PAGE_SIZE),
-    initialPageParam: 0,
-    getNextPageParam: (prev) => {
-      const nextSkip = prev.skip + PAGE_SIZE;
-      return nextSkip < prev.totalCount ? nextSkip : undefined;
-    },
-  });
+  const { data, isLoading, error, isSuccess, hasNextPage, fetchNextPage } =
+    useInfiniteQuery({
+      queryKey: ["characters", search],
+      queryFn: ({ pageParam = 0 }) => fetchWords(search, pageParam, PAGE_SIZE),
+      initialPageParam: 0,
+      getNextPageParam: (prev) => {
+        const nextSkip = prev.skip + PAGE_SIZE;
+        return nextSkip < prev.totalCount ? nextSkip : undefined;
+      },
+    });
 
   const words = useMemo(() => data?.pages.flatMap((p) => p.words), [data]);
 
   if (!search) return;
 
-  console.log({ isLoading, isFetching });
   if (isLoading) return <div className="text-center my-10">Loading...</div>;
 
   if (isSuccess)
@@ -71,5 +64,5 @@ export const CharactersSearch = ({ search }: Props) => {
         )}
       </>
     );
-  return <div>Error {error?.message}</div>;
+  return <ErrorHandler error={error} />;
 };
