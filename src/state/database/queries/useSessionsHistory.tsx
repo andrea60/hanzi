@@ -13,7 +13,7 @@ export const useSessionsHistory = (max: number) => {
       const sessions = await db.sessions
         .where("userId")
         .equals(user.uid)
-
+        .reverse()
         .sortBy("timestamp");
 
       return sessions.slice(0, max);

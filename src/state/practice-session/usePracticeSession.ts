@@ -6,6 +6,8 @@ import { getAuthenticatedUser } from "../../auth/useAuth";
 import { useMemo } from "react";
 import { saveSessionStats } from "../database/commands/saveSessionStats";
 import { showToast } from "../../components/toastr/useToast";
+import { useQueryClient } from "@tanstack/react-query";
+import { QueryKey } from "../database/queries/queryKey";
 
 export type WordPracticeStats = {
   word: string;
@@ -50,6 +52,7 @@ const sessionAtom = atomWithStorage<PracticeSessionState | undefined>(
 
 export const usePracticeSession = () => {
   const [session, setSession] = useAtom(sessionAtom);
+  const queryClient = useQueryClient();
 
   const startSession = async (numWords: number) => {
     if (session) throw new Error("Session already in progress");
@@ -147,6 +150,7 @@ export const usePracticeSession = () => {
       return;
     }
 
+    queryClient.invalidateQueries({ queryKey: QueryKey.Stats() })
     setSession(undefined);
   };
 

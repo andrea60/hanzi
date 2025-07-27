@@ -61,7 +61,7 @@ const SessionConfigurator = ({ totalWordsCount, onStart }: Props) => {
 
   const addWordCount = (val: number) => {
     setNumWords((c) =>
-      c + val < 1 || c + val >= totalWordsCount ? c : c + val
+      c + val < 1 || c + val > totalWordsCount ? c : c + val
     );
   };
 

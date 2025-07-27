@@ -1,4 +1,7 @@
 export const QueryKey = {
+  Stats() {
+    return ["stats"];
+  },
   WordDefinition(word: string) {
     return ["word", word];
   },
@@ -9,12 +12,12 @@ export const QueryKey = {
     return ["favourites", "count"];
   },
   AverageSessionAccuracy() {
-    return ["stats", "session", "avg-accuracy"];
+    return [...QueryKey.Stats(), "session", "avg-accuracy"];
   },
   SessionsHistory(limit: number) {
-    return ["stats", "session", limit];
+    return [...QueryKey.Stats(), "session", limit];
   },
   WordsAccuracyStats(direction: string, limit: number) {
-    return ["stats", "words", "accuracy", direction, limit];
+    return [...QueryKey.Stats(), "words", "accuracy", direction, limit];
   },
 };

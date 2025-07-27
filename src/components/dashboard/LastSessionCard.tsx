@@ -26,6 +26,7 @@ export const LastSessionCard = () => {
     .otherwise(([session]) => (
       <span className="text-2xl">{formatRelativeDate(session.timestamp)}</span>
     ));
+  console.log({ data });
 
   return (
     <div className="card card-default card-sm">
