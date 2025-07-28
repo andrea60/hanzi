@@ -3,6 +3,8 @@ import { NavigationBar } from "../../components/NavigationBar";
 import {
   BookOpenIcon,
   ChartBarIcon,
+  ExclamationTriangleIcon,
+  FaceFrownIcon,
   ListBulletIcon,
   MagnifyingGlassIcon,
   PlusIcon,
@@ -14,6 +16,10 @@ import { usePracticeSession } from "../../state/practice-session/usePracticeSess
 import { Overlay } from "../../components/modal/Overlay";
 import { PracticeSession } from "../../components/practice-session/PracticeSession";
 import { useCurrentPageTitle } from "../../utils/PageTitleProvider";
+import {
+  ErrorBoundary,
+  ErrorHandlerComponentProps,
+} from "../../components/ErrorBoundary";
 
 export const Route = createFileRoute("/app")({
   component: RouteComponent,
@@ -46,7 +52,9 @@ function RouteComponent() {
           </h1>
         </div>
         <div className="bg-base-200 flex-1 overflow-y-auto p-6 pt-4 pb-22 rounded-t-3xl shadow-md">
-          <Outlet />
+          <ErrorBoundary handler={ErrorHandler}>
+            <Outlet />
+          </ErrorBoundary>
           {session.isRunning && (
             <Overlay>
               <PracticeSession />
@@ -74,3 +82,16 @@ function RouteComponent() {
     </HanziDataSetProvider>
   );
 }
+
+const ErrorHandler = ({ error }: ErrorHandlerComponentProps) => {
+  const errorStack = error?.stack?.split("\n").map((s) => <p>{s}</p>);
+  return (
+    <div className="h-full flex flex-col items-center justify-center text-warning">
+      <FaceFrownIcon className="size-12 block" />
+      <p className="text-center">Damn, something went wrong...</p>
+      <code className="text-xs overflow-x-scroll max-w-full max-h-32 mt-2 whitespace-nowrap">
+        {errorStack}
+      </code>
+    </div>
+  );
+};
