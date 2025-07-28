@@ -1,7 +1,16 @@
 import { useFavouritesCount } from "../../state/database/queries/useFavourites";
 import { AnimatedNumber } from "../ui/AnimatedNumber";
+import { Card } from "../ui/Card";
 
 export const WordsCountCard = () => {
+  return (
+    <Card>
+      <CardContent />
+    </Card>
+  );
+};
+
+const CardContent = () => {
   const { data } = useFavouritesCount();
   const skeleton = (
     <div className="h-10 flex items-center">

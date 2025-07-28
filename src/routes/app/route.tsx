@@ -90,6 +90,7 @@ const ErrorHandler = ({ error }: ErrorHandlerComponentProps) => {
       <FaceFrownIcon className="size-12 block" />
       <p className="text-center">Damn, something went wrong...</p>
       <code className="text-xs overflow-x-scroll max-w-full max-h-32 mt-2 whitespace-nowrap">
+        <p>{error.message}</p>
         {errorStack}
       </code>
     </div>

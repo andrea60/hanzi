@@ -4,8 +4,17 @@ import {
   CalendarDateRangeIcon,
   CalendarDaysIcon,
 } from "@heroicons/react/24/solid";
+import { Card } from "../ui/Card";
 
 export const LastSessionCard = () => {
+  return (
+    <Card>
+      <CardContent />
+    </Card>
+  );
+};
+
+const CardContent = () => {
   const { data } = useSessionsHistory(1);
   const skeleton = (
     <div className="h-10 flex items-center">
@@ -26,28 +35,18 @@ export const LastSessionCard = () => {
     .otherwise(([session]) => (
       <span className="text-2xl">{formatRelativeDate(session.timestamp)}</span>
     ));
-  console.log({ data });
-
   return (
-    <div className="card card-default card-sm">
-      <div className="card-body">
-        <h1>Last Session</h1>
-        <div className="flex items-center gap-2 justify-between">
-          {content}
-          <CalendarDaysIcon className="size-8" />
-        </div>
+    <div className="card-body">
+      <h1>Last Session</h1>
+      <div className="flex items-center gap-2 justify-between">
+        {content}
+        <CalendarDaysIcon className="size-8" />
       </div>
     </div>
   );
 };
 
-/**
- * Compare input date with today and return a human-readable description.
- *
- * @param inputDate - The date to compare.
- * @returns "Today", "Yesterday", or "X days ago"
- */
-export function formatRelativeDate(inputDate: Date): string {
+function formatRelativeDate(inputDate: Date): string {
   const today = new Date();
 
   // Normalize both dates to ignore time (set to midnight)
