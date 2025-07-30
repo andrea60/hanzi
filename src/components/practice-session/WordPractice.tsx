@@ -4,6 +4,7 @@ import { useResettableState } from "../../utils/useResettableState";
 import { ArrowPathIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 import { CheckCircleIcon as CheckCircleIconSolid } from "@heroicons/react/24/solid";
 import { isMotionComponent, motion } from "motion/react";
+import { AccuracyBadge } from "../ui/AccuracyBadge";
 
 export const WordPractice = () => {
   const {
@@ -50,22 +51,26 @@ export const WordPractice = () => {
     <div className="grow flex flex-col">
       <progress className="progress w-full mb-2" value={progress} max="1" />
       <div>
-        <h1 className="text-2xl mb-1">
-          {currentWord.pinyin}
-          {wordCompleted && (
-            <motion.span
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{
-                duration: 0.4,
-                scale: { type: "spring", visualDuration: 0.4, bounce: 0.4 },
-              }}
-              className="inline-block"
-            >
-              <CheckCircleIconSolid className="ml-1 size-6 inline text-success" />
-            </motion.span>
-          )}
-        </h1>
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl mb-1">
+            {currentWord.pinyin}
+            {wordCompleted && (
+              <motion.span
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{
+                  duration: 0.4,
+                  scale: { type: "spring", visualDuration: 0.4, bounce: 0.4 },
+                }}
+                className="inline-block"
+              >
+                <CheckCircleIconSolid className="ml-1 size-6 inline text-success" />
+              </motion.span>
+            )}
+          </h1>
+          <AccuracyBadge accuracy={accuracy ?? 1} />
+        </div>
+
         <p className="text-xs h-6 whitespace-nowrap overflow-hidden text-ellipsis">
           {currentWord.definitions.join(", ")}
         </p>
@@ -75,6 +80,7 @@ export const WordPractice = () => {
           key={currentWord.uuid}
           word={currentWord.word}
           onComplete={handleComplete}
+          onAccuracyChange={setAccuracy}
         />
       </div>
 

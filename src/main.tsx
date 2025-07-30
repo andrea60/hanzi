@@ -7,6 +7,9 @@ import { routeTree } from "./routeTree.gen";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { showToast } from "./components/toastr/useToast";
 
+// Extensions
+import "./utils/extensions/array-extensions";
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -21,6 +24,7 @@ const queryClient = new QueryClient({
 
         return false;
       },
+      networkMode: "always",
     },
   },
 });

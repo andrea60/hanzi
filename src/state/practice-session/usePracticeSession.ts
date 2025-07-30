@@ -26,7 +26,7 @@ type InProgressSessionState = {
   id: string;
   totalWords: number;
   queue: WordPracticeData[];
-  startTime: Date;
+  startTime: string;
   completed: Record<string, WordPracticeStats>;
 };
 
@@ -37,8 +37,8 @@ type CompletedSessionState = {
   avgAccuracy: number;
   timeTakenSeconds: number;
   stats: WordPracticeStats[];
-  startTime: Date;
-  endTime: Date;
+  startTime: string;
+  endTime: string;
 };
 
 type PracticeSessionState = InProgressSessionState | CompletedSessionState;
@@ -66,7 +66,7 @@ export const usePracticeSession = () => {
       totalWords: words.length,
       completed: {},
       queue: words,
-      startTime: new Date(),
+      startTime: new Date().toISOString(),
     });
   };
 
@@ -80,8 +80,9 @@ export const usePracticeSession = () => {
 
       if (queue.length === 0) {
         const endTime = new Date();
+        const startTime = new Date(prev.startTime);
         const timeTakenSeconds =
-          (endTime.valueOf() - prev.startTime.valueOf()) / 1000;
+          (endTime.valueOf() - startTime.valueOf()) / 1000;
 
         const stats = Object.values(completed);
         const avgAccuracy = getAvgAccuracy(stats);
@@ -92,7 +93,7 @@ export const usePracticeSession = () => {
           avgAccuracy,
           stats,
           startTime: prev.startTime,
-          endTime: endTime,
+          endTime: endTime.toISOString(),
           id: prev.id,
           totalWords: stats.length,
         };
@@ -121,13 +122,13 @@ export const usePracticeSession = () => {
   const closeSession = async () => {
     if (!session || session.state !== "Completed") return;
     const user = getAuthenticatedUser();
-
+    const startTime = new Date(session.startTime);
     try {
-      await updateWordStats(user.uid, session.stats, session.startTime);
+      await updateWordStats(user.uid, session.stats, startTime);
 
       await saveSessionStats(
         session.id,
-        session.startTime,
+        startTime,
         session.timeTakenSeconds,
         session.avgAccuracy,
         session.stats.map((s) => s.word),
@@ -147,10 +148,10 @@ export const usePracticeSession = () => {
           content: "Unknown error occured while trying to save this session",
           type: "sticky",
         });
-      return;
+      return false;
     }
 
-    queryClient.invalidateQueries({ queryKey: QueryKey.Stats() })
+    queryClient.invalidateQueries({ queryKey: QueryKey.Stats() });
     setSession(undefined);
   };
 

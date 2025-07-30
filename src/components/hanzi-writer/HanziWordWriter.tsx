@@ -18,8 +18,13 @@ import { getAccuracy } from "./get-accuracy";
 type Props = {
   word: string;
   onComplete: (accuracy: number) => void;
+  onAccuracyChange?: (accuracy: number) => void;
 };
-export const HanziWordWriter = ({ word, onComplete }: Props) => {
+export const HanziWordWriter = ({
+  word,
+  onComplete,
+  onAccuracyChange,
+}: Props) => {
   const stepContainer = useRef<HTMLDivElement>(null);
   const chars = useMemo(() => word.split(""), [word]);
   const [containerSize, setContainerSize] = useState<number>();
@@ -27,19 +32,30 @@ export const HanziWordWriter = ({ word, onComplete }: Props) => {
   const [stepStates, setStepStates] = useState<boolean[]>(
     chars.map(() => false)
   );
-  const [charsAccuracies, setCharsAccuracies] = useResettableState<number[]>(
-    [],
-    [chars]
-  );
+  const [charsAccuracies, setCharsAccuracies] = useResettableState<
+    Record<number, number>
+  >({}, [chars]);
 
   useLayoutEffect(() => {
     if (!stepContainer.current) return;
     setContainerSize(stepContainer.current?.clientWidth);
   }, []);
 
+  const handleAccuracyChange = (step: number, accuracy: number) => {
+    setCharsAccuracies((c) => {
+      const newVal = { ...c };
+      newVal[step] = accuracy;
+      return newVal;
+    });
+  };
+
   const handleStepComplete = useCallback(
-    debounce((step: number, report: HanziWriterReport) => {
-      setCharsAccuracies((c) => [...c, getAccuracy(report)]);
+    debounce((step: number, avgAccuracy: number) => {
+      setCharsAccuracies((c) => {
+        const newAcc = { ...c };
+        newAcc[step] = avgAccuracy;
+        return newAcc;
+      });
 
       setStepStates((steps) => {
         const newSteps = [...steps];
@@ -54,13 +70,19 @@ export const HanziWordWriter = ({ word, onComplete }: Props) => {
   );
 
   useEffect(() => {
+    // propagate step completion to parent
     const isCompleted = !stepStates.some((s) => s === false);
     if (isCompleted) {
-      const avgAccuracy =
-        charsAccuracies.reduce((c, n) => c + n) / charsAccuracies.length;
-      onComplete(avgAccuracy);
+      onComplete(Object.values(charsAccuracies).average()!);
     }
   }, [stepStates]);
+
+  useEffect(() => {
+    // Propage accuracy changes to parent
+    const accuracy = Object.values(charsAccuracies).average();
+    if (!accuracy) return;
+    onAccuracyChange?.(accuracy);
+  }, [charsAccuracies]);
 
   return (
     <>
@@ -88,6 +110,7 @@ export const HanziWordWriter = ({ word, onComplete }: Props) => {
               <HanziCharacterWriter
                 char={char}
                 onComplete={(report) => handleStepComplete(idx, report)}
+                onAccuracyChange={(acc) => handleAccuracyChange(idx, acc)}
                 size={containerSize}
               />
             </div>

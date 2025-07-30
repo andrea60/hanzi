@@ -4,6 +4,7 @@ import { db } from "../../state/database/database.db";
 import { useResettableState } from "../../utils/useResettableState";
 import { ArrowPathIcon, LightBulbIcon } from "@heroicons/react/24/outline";
 import { useAsyncEffect } from "../../utils/useAsyncEffect";
+import { getAccuracy } from "./get-accuracy";
 
 export type HanziWriterReport = {
   hints: number;
@@ -14,7 +15,8 @@ export type HanziWriterReport = {
 type Props = {
   char: string;
   size: number;
-  onComplete: (report: HanziWriterReport) => void;
+  onComplete: (accuracy: number) => void;
+  onAccuracyChange?: (accuracy: number) => void;
 };
 export const HanziCharacterWriter = (props: Props) => {
   const { char, size } = props;
@@ -51,17 +53,31 @@ export const HanziCharacterWriter = (props: Props) => {
           return strokeData?.strokes as CharacterJson;
         },
         onCorrectStroke: (data) => {
-          setCurrentStroke(data.strokeNum + 1);
+          props.onAccuracyChange?.(
+            getAccuracy({
+              hints,
+              mistakes: data.totalMistakes,
+              strokes: strokesNumber.current!,
+            })
+          );
         },
         onMistake(strokeData) {
-          console.log(strokeData);
+          props.onAccuracyChange?.(
+            getAccuracy({
+              hints,
+              mistakes: strokeData.totalMistakes,
+              strokes: strokesNumber.current!,
+            })
+          );
         },
         onComplete: (summary) => {
-          props.onComplete({
-            hints,
-            mistakes: summary.totalMistakes,
-            strokes: strokesNumber.current!,
-          });
+          props.onComplete(
+            getAccuracy({
+              hints,
+              mistakes: summary.totalMistakes,
+              strokes: strokesNumber.current!,
+            })
+          );
           setIsCompleted(true);
         },
       }
