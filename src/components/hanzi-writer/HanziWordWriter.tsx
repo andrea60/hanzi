@@ -109,6 +109,7 @@ export const HanziWordWriter = ({
             >
               <HanziCharacterWriter
                 char={char}
+                maxHints={2}
                 onComplete={(report) => handleStepComplete(idx, report)}
                 onAccuracyChange={(acc) => handleAccuracyChange(idx, acc)}
                 size={containerSize}

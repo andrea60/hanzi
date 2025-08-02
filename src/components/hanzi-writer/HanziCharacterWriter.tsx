@@ -14,6 +14,7 @@ export type HanziWriterReport = {
 
 type Props = {
   char: string;
+  maxHints: number;
   size: number;
   onComplete: (accuracy: number) => void;
   onAccuracyChange?: (accuracy: number) => void;
@@ -22,6 +23,7 @@ export const HanziCharacterWriter = (props: Props) => {
   const { char, size } = props;
   const [currentStroke, setCurrentStroke] = useResettableState(() => 0, [char]);
   const [hints, setHints] = useState(0);
+  const [mistakes, setMistakes] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
   const containerRef = useRef<SVGSVGElement>(null);
   const writerInstance = useRef<HanziWriter>(null);
@@ -60,6 +62,7 @@ export const HanziCharacterWriter = (props: Props) => {
               strokes: strokesNumber.current!,
             })
           );
+          setCurrentStroke(data.strokeNum + 1);
         },
         onMistake(strokeData) {
           props.onAccuracyChange?.(
@@ -69,6 +72,7 @@ export const HanziCharacterWriter = (props: Props) => {
               strokes: strokesNumber.current!,
             })
           );
+          setMistakes(strokeData.totalMistakes);
         },
         onComplete: (summary) => {
           props.onComplete(
@@ -78,6 +82,8 @@ export const HanziCharacterWriter = (props: Props) => {
               strokes: strokesNumber.current!,
             })
           );
+
+          setMistakes(summary.totalMistakes);
           setIsCompleted(true);
         },
       }
@@ -93,6 +99,13 @@ export const HanziCharacterWriter = (props: Props) => {
   const showNextStroke = () => {
     writerInstance.current?.highlightStroke(currentStroke);
     setHints((x) => x + 1);
+    props.onAccuracyChange?.(
+      getAccuracy({
+        hints: hints + 1,
+        mistakes: mistakes,
+        strokes: strokesNumber.current!,
+      })
+    );
   };
 
   const reset = () => {
@@ -101,6 +114,8 @@ export const HanziCharacterWriter = (props: Props) => {
     setIsCompleted(false);
     setCurrentStroke(0);
   };
+
+  const hintsLeft = props.maxHints - hints;
 
   return (
     <>
@@ -127,10 +142,10 @@ export const HanziCharacterWriter = (props: Props) => {
         <button
           className="btn btn-sm btn-ghost"
           onClick={showNextStroke}
-          disabled={isCompleted}
+          disabled={isCompleted || hints >= props.maxHints}
         >
           <LightBulbIcon className="size-4" />
-          Hint
+          Hint ({hintsLeft}/{props.maxHints})
         </button>
         <button className="btn btn-sm btn-ghost" onClick={reset}>
           Reset <ArrowPathIcon className="size-4" />
