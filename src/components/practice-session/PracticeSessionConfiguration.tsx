@@ -167,7 +167,7 @@ const bucketToStep = (bucket: BucketDef): MultiProgressionStage => {
     }))
     .with("leastPracticed", () => ({
       value: bucket.weight,
-      label: "Least Practiced",
+      label: "Rusty",
     }))
     .with("random", () => ({
       value: bucket.weight,

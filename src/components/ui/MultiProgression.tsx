@@ -20,9 +20,9 @@ export const MultiProgression = ({ stages, className }: Props) => {
         <div
           key={index}
           className={classNames(
-            "h-full text-xs flex items-center justify-center border-base-300  ",
+            "h-full text-xs flex items-center justify-center border-base-300  text-primary-content whitespace-nowrap px-1 overflow-x-hidden",
             `bg-primary/${100 - index * 25}`,
-            "text-primary-content",
+
             {
               "rounded-l-full": index === 0,
               "rounded-r-full": index === stages.length - 1,
