@@ -3,7 +3,7 @@ import { Outlet } from "@tanstack/react-router";
 import debounce from "lodash.debounce";
 import { useState, useCallback } from "react";
 import { usePageTitle } from "../../utils/PageTitleProvider";
-import { CharactersList } from "./CharactersList";
+import { WordsList } from "./WordsList";
 import { CharactersSearch } from "./CharactersSearch";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 
@@ -38,11 +38,7 @@ export const CharactersPage = () => {
           onClick={handleInputClick}
         />
       </label>
-      {searchMode ? (
-        <CharactersSearch search={searchValue} />
-      ) : (
-        <CharactersList />
-      )}
+      {searchMode ? <CharactersSearch search={searchValue} /> : <WordsList />}
       <Outlet />
     </>
   );

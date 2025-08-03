@@ -10,7 +10,7 @@ import { useModal } from "../modal/useModal";
 import { ImportExportWordsModal } from "./ImportExportWordsModal";
 import { useFavouritesPaginated } from "../../state/database/queries/useFavourites";
 
-export const CharactersList = () => {
+export const WordsList = () => {
   const { openModal } = useModal();
   const { data, hasNextPage, fetchNextPage, isLoading } =
     useFavouritesPaginated();

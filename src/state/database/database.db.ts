@@ -50,7 +50,7 @@ db.version(2).stores({
   strokeData: "char",
   dictionary: "word, searchablePinyin",
   versions: "version, date",
-  favourites: "[word+userId], userId",
+  favourites: "[word+userId], userId, addedAt",
   wordStats: "[word+userId], userId, [userId+avgAccuracy]",
   sessions: "[id+userId], userId",
 });

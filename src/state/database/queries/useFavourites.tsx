@@ -2,6 +2,7 @@ import { getAuthenticatedUser } from "../../../auth/useAuth";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { db } from "../database.db";
 import { QueryKey } from "./queryKey";
+import { toMap } from "../../../utils/toMap";
 
 export const useFavourites = () => {
   return useQuery({
@@ -41,9 +42,16 @@ export const useFavouritesPaginated = () => {
         .where("word")
         .anyOf(favs.map((f) => f.word))
         .toArray();
+
+      const favsMap = toMap(favs, (f) => f.word);
+      const orderedWords = words.sortBy(
+        (w) => favsMap.get(w.word)?.addedAt.valueOf(),
+        "desc"
+      );
+
       return {
         totalCount,
-        words,
+        words: orderedWords,
         offset: pageParam,
       };
     },
