@@ -1,5 +1,8 @@
 import { XMarkIcon } from "@heroicons/react/24/solid";
-import { usePracticeSession } from "../../state/practice-session/usePracticeSession";
+import {
+  forceDeleteSession,
+  usePracticeSession,
+} from "../../state/practice-session/usePracticeSession";
 import { useConfirm } from "../modal/useConfirm";
 import { WordPractice } from "./WordPractice";
 import { EndSessionReport } from "./EndSessionReport";
@@ -39,7 +42,13 @@ const ErrorHandler: ErrorHandlerComponent = ({ error }) => (
   <div className="flex flex-col items-center justify-center h-full">
     <h2 className="text-2xl font-bold mb-4">An error occurred</h2>
     <p className="text-red-500 mb-2">{error.message}</p>
-    <p className="text-sm link" onClick={() => session.discardSession()}>
+    <p
+      className="text-sm link"
+      onClick={() => {
+        forceDeleteSession();
+        location.reload();
+      }}
+    >
       You can click here to discard and close this session
     </p>
   </div>

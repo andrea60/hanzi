@@ -46,12 +46,15 @@ type CompletedSessionState = {
 
 type PracticeSessionState = InProgressSessionState | CompletedSessionState;
 
-// todo implement atom
-
+const storageKey = "hanzi-current-session";
 const sessionAtom = atomWithStorage<PracticeSessionState | undefined>(
-  "hanzi-current-session",
+  storageKey,
   undefined
 );
+
+export const forceDeleteSession = () => {
+  localStorage.removeItem(storageKey);
+}
 
 export const usePracticeSession = () => {
   const [session, setSession] = useAtom(sessionAtom);

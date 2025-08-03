@@ -9,7 +9,6 @@ type Props = {
   className?: string;
 };
 export const MultiProgression = ({ stages, className }: Props) => {
-  console.log(stages);
   return (
     <div
       className={classNames(

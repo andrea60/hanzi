@@ -3,7 +3,7 @@ import { HanziWordWriter } from "../hanzi-writer/HanziWordWriter";
 import { useResettableState } from "../../utils/useResettableState";
 import { ArrowPathIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 import { CheckCircleIcon as CheckCircleIconSolid } from "@heroicons/react/24/solid";
-import { isMotionComponent, motion } from "motion/react";
+import { motion } from "motion/react";
 import { AccuracyBadge } from "../ui/AccuracyBadge";
 
 export const WordPractice = () => {

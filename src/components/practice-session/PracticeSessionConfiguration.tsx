@@ -28,9 +28,9 @@ export const PracticeSessionConfiguration = () => {
   if (favouritesCount === undefined) return <p>Loading...</p>;
   if (isRunning) return <RunningSessionPlaceholder />;
 
-  const handleOnStart = (numWords: number) => {
+  const handleOnStart = (numWords: number, buckets: BucketDef[]) => {
     if (isRunning) return;
-    startSession(numWords, []);
+    startSession(numWords, buckets);
   };
   return (
     <div className="flex flex-col h-full">
@@ -64,11 +64,13 @@ const practiceTemplateAtom = atomWithStorage<string>(
 );
 type Props = {
   totalWordsCount: number;
-  onStart: (numWords: number) => void;
+  onStart: (numWords: number, bucketDefs: BucketDef[]) => void;
 };
 const SessionConfigurator = ({ totalWordsCount, onStart }: Props) => {
   const [numWords, setNumWords] = useAtom(numWordsAtom);
-  const [practiceTemplate, setPracticeTemplate] = useAtom(practiceTemplateAtom);
+  const [selectedTemplateName, setSelectedTemplateName] =
+    useAtom(practiceTemplateAtom);
+  const selectedTemplated = PracticeTemplates[selectedTemplateName];
 
   const addWordCount = (val: number) => {
     setNumWords((c) =>
@@ -123,8 +125,8 @@ const SessionConfigurator = ({ totalWordsCount, onStart }: Props) => {
           <label>What do you want to focus on?</label>
           <select
             className="select block w-full my-2 select-lg"
-            value={practiceTemplate}
-            onChange={(e) => setPracticeTemplate(e.target.value)}
+            value={selectedTemplateName}
+            onChange={(e) => setSelectedTemplateName(e.target.value)}
           >
             {Object.entries(PracticeTemplates).map(([key, template]) => (
               <option key={key} value={key}>
@@ -134,19 +136,17 @@ const SessionConfigurator = ({ totalWordsCount, onStart }: Props) => {
           </select>
           <MultiProgression
             className="my-4"
-            stages={PracticeTemplates[practiceTemplate].buckets.map(
-              bucketToStep
-            )}
+            stages={selectedTemplated.buckets.map(bucketToStep)}
           />
           <p className="text-xs">
             <InformationCircleIcon className="size-4 mr-2 inline" />
-            {PracticeTemplates[practiceTemplate].description}
+            {selectedTemplated.description}
           </p>
         </div>
 
         <button
           className="btn btn-primary w-full mt-auto mb-2 self-end"
-          onClick={() => onStart(numWords)}
+          onClick={() => onStart(numWords, selectedTemplated.buckets)}
         >
           <BookOpenIcon className="size-6" /> Let's Start!
         </button>
