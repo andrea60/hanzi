@@ -1,6 +1,6 @@
 import { useAtom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
-import { selectPracticeWords } from "./select-practice-words";
+import { BucketDef, selectPracticeWords } from "./select-practice-words";
 import { updateWordStats } from "../database/commands/updateWordStats";
 import { getAuthenticatedUser } from "../../auth/useAuth";
 import { useMemo } from "react";
@@ -19,6 +19,9 @@ export type WordPracticeData = {
   word: string;
   pinyin: string;
   definitions: string[];
+  avgAccuracy: number | undefined;
+  practiceCount: number | undefined;
+  lastPracticed: Date | undefined;
 };
 
 type InProgressSessionState = {
@@ -54,11 +57,11 @@ export const usePracticeSession = () => {
   const [session, setSession] = useAtom(sessionAtom);
   const queryClient = useQueryClient();
 
-  const startSession = async (numWords: number) => {
+  const startSession = async (numWords: number, buckets: BucketDef[]) => {
     if (session) throw new Error("Session already in progress");
 
     // get the random words from the database
-    const words = await selectPracticeWords(numWords);
+    const words = await selectPracticeWords(numWords, buckets);
 
     setSession({
       state: "InProgress",

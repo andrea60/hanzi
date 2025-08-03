@@ -1,10 +1,11 @@
 @import "tailwindcss";
 @plugin "daisyui" {
-  themes: retro --default;
+  themes: retro-v2 --default;
 }
 @source inline("bg-error/{{0..100..5}}");
 @source inline("bg-success/{{0..100..5}}");
 @source inline("bg-warning/{{0..100..5}}");
+@source inline("bg-primary/{{0..100..5}}");
 
 html {
    overscroll-behavior: none;
@@ -45,41 +46,6 @@ body, html, #root {
   }
 }
 
-@plugin "daisyui/theme" {
-  name: "neutral-1";
-  default: false;
-  prefersdark: false;
-  color-scheme: "light";
-  --color-base-100: oklch(95.127% 0.007 260.731);
-  --color-base-200: oklch(93.299% 0.01 261.788);
-  --color-base-300: oklch(89.925% 0.016 262.749);
-  --color-base-content: oklch(32.437% 0.022 264.182);
-  --color-primary: oklch(78% 0.154 211.53);
-  --color-primary-content: oklch(11.887% 0.015 254.027);
-  --color-secondary: oklch(69.651% 0.059 248.687);
-  --color-secondary-content: oklch(13.93% 0.011 248.687);
-  --color-accent: oklch(77.464% 0.062 217.469);
-  --color-accent-content: oklch(15.492% 0.012 217.469);
-  --color-neutral: oklch(45.229% 0.035 264.131);
-  --color-neutral-content: oklch(89.925% 0.016 262.749);
-  --color-info: oklch(69.207% 0.062 332.664);
-  --color-info-content: oklch(13.841% 0.012 332.664);
-  --color-success: oklch(76.827% 0.074 131.063);
-  --color-success-content: oklch(39% 0.095 152.535);
-  --color-warning: oklch(85.486% 0.089 84.093);
-  --color-warning-content: oklch(55% 0.163 48.998);
-  --color-error: oklch(60.61% 0.12 15.341);
-  --color-error-content: oklch(93% 0.032 17.717);
-  --radius-selector: 1rem;
-  --radius-field: 0.25rem;
-  --radius-box: 0.5rem;
-  --size-selector: 0.25rem;
-  --size-field: 0.25rem;
-  --border: 1px;
-  --depth: 0;
-  --noise: 0;
-}
-
 
 @font-face {
   font-family: "Ma Shan Zheng";
@@ -93,31 +59,33 @@ body, html, #root {
   @apply bg-base-100 border-base-200 shadow-[0_.1rem_.5rem_-.3rem_#0003];
 }
 
+
+
 @plugin "daisyui/theme" {
-  name: "retro";
-  default: false;
+  name: "retro-v2";
+  default: true;
   prefersdark: false;
   color-scheme: "light";
   --color-base-100: oklch(91.637% 0.034 90.515);
   --color-base-200: oklch(88.272% 0.049 91.774);
   --color-base-300: oklch(84.133% 0.065 90.856);
   --color-base-content: oklch(41% 0.112 45.904);
-  --color-primary: oklch(80% 0.114 19.571);
-  --color-primary-content: oklch(39% 0.141 25.723);
-  --color-secondary: oklch(92% 0.084 155.995);
-  --color-secondary-content: oklch(44% 0.119 151.328);
+  --color-primary: oklch(55% 0.163 48.998);
+  --color-primary-content: oklch(96% 0.059 95.617);
+  --color-secondary: oklch(94% 0.129 101.54);
+  --color-secondary-content: oklch(42% 0.095 57.708);
   --color-accent: oklch(68% 0.162 75.834);
   --color-accent-content: oklch(41% 0.112 45.904);
   --color-neutral: oklch(44% 0.011 73.639);
   --color-neutral-content: oklch(86% 0.005 56.366);
-  --color-info: oklch(58% 0.158 241.966);
-  --color-info-content: oklch(96% 0.059 95.617);
+  --color-info: oklch(82% 0.111 230.318);
+  --color-info-content: oklch(29% 0.066 243.157);
   --color-success: oklch(51% 0.096 186.391);
   --color-success-content: oklch(96% 0.059 95.617);
   --color-warning: oklch(64% 0.222 41.116);
   --color-warning-content: oklch(96% 0.059 95.617);
-  --color-error: oklch(70% 0.191 22.216);
-  --color-error-content: oklch(40% 0.123 38.172);
+  --color-error: oklch(57% 0.245 27.325);
+  --color-error-content: oklch(98% 0.016 73.684);
   --radius-selector: 0.25rem;
   --radius-field: 0.25rem;
   --radius-box: 0.5rem;
@@ -127,6 +95,8 @@ body, html, #root {
   --depth: 0;
   --noise: 0;
 }
+
+
 
 
 
