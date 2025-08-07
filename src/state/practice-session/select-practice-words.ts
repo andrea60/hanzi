@@ -7,6 +7,7 @@ import { getAuthenticatedUser } from "../../auth/useAuth";
 export type BucketType =
   | "worstAccuracy"
   | "leastPracticed"
+  | "lastPracticed"
   | "newest"
   | "random";
 
@@ -47,6 +48,11 @@ export const bucketWords = (
       )
       .with("newest", () =>
         wordStats.sortBy((r) => r.addedAt?.getTime() ?? 0, "desc")
+      )
+      .with("lastPracticed", () =>
+        wordStats
+          .filter((w) => w.lastPracticed)
+          .sortBy((w) => w.lastPracticed!.valueOf(), "asc")
       )
       .with("random", () => wordStats)
       .exhaustive();

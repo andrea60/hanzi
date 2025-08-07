@@ -118,7 +118,8 @@ export const WordPractice = () => {
 
 const bucketTypeToLabel = (type: BucketType) =>
   match(type)
-    .with("leastPracticed", () => "Rusty Word")
+    .with("lastPracticed", () => "Rusty Word")
+    .with("leastPracticed", () => "Uncommon Word")
     .with("newest", () => "New Word")
     .with("worstAccuracy", () => "Weak Word")
     .with("random", () => "Random")

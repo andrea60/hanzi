@@ -20,7 +20,7 @@ type Props = {
 };
 export const WordsComparison = ({ words }: Props) => {
   const sortedWords = useMemo(
-    () => words.sortByProperty("accuracy", "desc"),
+    () => words.sortByProperty("sessionAccuracy", "desc"),
     [words]
   );
   return (
@@ -37,9 +37,9 @@ type CardProps = {
 };
 const WordComparisonCard = ({ word }: CardProps) => {
   const comparison = match(word)
-    .with({ prevAccuracy: undefined }, () => <span>New Word!</span>)
+    .with({ prevAvgAccuracy: undefined }, () => <span>New Word!</span>)
     .when(
-      (x) => x.accuracy === x.prevAccuracy,
+      (x) => x.newAvgAccuracy === x.prevAvgAccuracy,
       () => (
         <span className="items-center flex">
           <EllipsisHorizontalIcon className="size-4 inline mr-1" />
@@ -48,7 +48,7 @@ const WordComparisonCard = ({ word }: CardProps) => {
       )
     )
     .when(
-      (x) => x.accuracy > x.prevAccuracy!,
+      (x) => x.newAvgAccuracy > x.prevAvgAccuracy!,
       () => (
         <span className="text-success items-center flex">
           <ArrowTrendingUpIcon className="size-4 inline mr-1" />
@@ -57,7 +57,7 @@ const WordComparisonCard = ({ word }: CardProps) => {
       )
     )
     .when(
-      (x) => x.accuracy < x.prevAccuracy!,
+      (x) => x.newAvgAccuracy < x.prevAvgAccuracy!,
       () => (
         <span className="text-error items-center flex">
           <ArrowTrendingDownIcon className="size-4 inline mr-1" />
@@ -74,9 +74,9 @@ const WordComparisonCard = ({ word }: CardProps) => {
         </div>
 
         <div className="flex gap-2 items-center row-span-2">
-          <AccuracyBadge accuracy={word.prevAccuracy} />
+          <AccuracyBadge accuracy={word.prevAvgAccuracy} />
           <ArrowRightIcon className="size-4 inline" />
-          <AccuracyBadge accuracy={word.accuracy} />
+          <AccuracyBadge accuracy={word.sessionAccuracy} />
         </div>
         <div>{comparison}</div>
       </div>

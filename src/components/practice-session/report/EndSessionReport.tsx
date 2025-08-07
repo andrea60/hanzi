@@ -36,7 +36,9 @@ export const EndSessionReport = () => {
   const avgAccuracyPerc = avgAccuracy * 100;
 
   const [best, worst] = useMemo(() => {
-    const sorted = stats.sort((a, b) => (a.accuracy < b.accuracy ? 1 : -1));
+    const sorted = stats.sort((a, b) =>
+      a.sessionAccuracy < b.sessionAccuracy ? 1 : -1
+    );
     return [sorted[0], sorted.slice(-1)[0]] as const;
   }, [stats]);
 

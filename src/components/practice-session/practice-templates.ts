@@ -39,7 +39,7 @@ export const PracticeTemplates: TemplatesStore = {
     name: "Refresh Your Memory",
     description: "Revisits words you haven't seen in a while",
     buckets: [
-      { bucketType: "leastPracticed", weight: 0.75 },
+      { bucketType: "lastPracticed", weight: 0.75 },
       { bucketType: "random", weight: 0.25 },
     ],
   },

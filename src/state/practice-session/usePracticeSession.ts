@@ -15,9 +15,13 @@ import { QueryKey } from "../database/queries/queryKey";
 
 export type WordPracticeStats = {
   word: string;
-  accuracy: number;
   pinyin: string;
-  prevAccuracy: number | undefined;
+  /** The accuracy specific to this session */
+  sessionAccuracy: number;
+  /** Average accuracy of previous session */
+  prevAvgAccuracy: number | undefined;
+  /** Average accuracy after this session */
+  newAvgAccuracy: number;
 };
 
 export type WordPracticeData = {
@@ -89,13 +93,9 @@ export const usePracticeSession = () => {
       const [current, ...queue] = prev.queue;
       const completed = { ...prev.completed };
       // Add the stats only if they weren't added before. The first stats are the only significant ones
-      if (!completed[current.word])
-        completed[current.word] = {
-          word: current.word,
-          accuracy,
-          pinyin: current.pinyin,
-          prevAccuracy: current.avgAccuracy,
-        };
+      if (!completed[current.word]) {
+        completed[current.word] = computeStats(current, accuracy);
+      }
 
       if (queue.length === 0) {
         const endTime = new Date();
@@ -135,12 +135,7 @@ export const usePracticeSession = () => {
         queue: [...queue, { ...current, uuid: crypto.randomUUID() }],
         completed: {
           ...prev.completed,
-          [current.word]: {
-            word: current.word,
-            accuracy,
-            pinyin: current.pinyin,
-            prevAccuracy: current.avgAccuracy,
-          },
+          [current.word]: computeStats(current, accuracy),
         },
       };
     });
@@ -227,7 +222,26 @@ const getProgress = (state: InProgressSessionState): number => {
 };
 
 const getAvgAccuracy = (stats: WordPracticeStats[]) => {
-  if (stats.length === 1) return stats[0].accuracy;
+  if (stats.length === 1) return stats[0].sessionAccuracy;
 
-  return stats.map((s) => s.accuracy).reduce((c, n) => c + n) / stats.length;
+  return (
+    stats.map((s) => s.sessionAccuracy).reduce((c, n) => c + n) / stats.length
+  );
+};
+
+const computeStats = (
+  wordData: WordPracticeData,
+  accuracy: number
+): WordPracticeStats => {
+  const newAvgAccuracy = wordData.avgAccuracy
+    ? (wordData.avgAccuracy + accuracy) / 2
+    : accuracy;
+
+  return {
+    word: wordData.word,
+    pinyin: wordData.pinyin,
+    sessionAccuracy: accuracy,
+    prevAvgAccuracy: wordData.avgAccuracy,
+    newAvgAccuracy,
+  };
 };

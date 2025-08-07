@@ -44,7 +44,7 @@ export const NavigationBar = ({ links }: Props) => {
           >
             <div
               className={cn("size-10 p-2 btn btn-default shadow-lg", {
-                "btn-neutral": "to" in link && location.pathname === link.to,
+                "btn-primary": "to" in link && location.pathname === link.to,
               })}
             >
               <Icon />
