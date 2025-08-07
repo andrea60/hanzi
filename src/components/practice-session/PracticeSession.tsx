@@ -5,7 +5,7 @@ import {
 } from "../../state/practice-session/usePracticeSession";
 import { useConfirm } from "../modal/useConfirm";
 import { WordPractice } from "./WordPractice";
-import { EndSessionReport } from "./EndSessionReport";
+import { EndSessionReport } from "./report/EndSessionReport";
 import { ErrorBoundary, ErrorHandlerComponent } from "../ErrorBoundary";
 
 export const PracticeSession = () => {
@@ -23,7 +23,7 @@ export const PracticeSession = () => {
   };
 
   return (
-    <div className="rounded-lg p-6 h-full w-full bg-base-200 flex flex-col">
+    <div className="rounded-lg p-6 h-full max-h-full w-full bg-base-200 flex flex-col overflow-y-hidden">
       <ErrorBoundary handler={ErrorHandler}>
         {!session.isCompleted && (
           <XMarkIcon

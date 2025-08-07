@@ -10,12 +10,13 @@ import {
   HandThumbDownIcon,
   HandThumbUpIcon,
 } from "@heroicons/react/24/solid";
-import { RadialProgress } from "../ui/RadialProgress";
+import { RadialProgress } from "../../ui/RadialProgress";
 import { PropsWithChildren, useMemo } from "react";
-import { usePracticeSession } from "../../state/practice-session/usePracticeSession";
-import { useWordDefinition } from "../../state/database/queries/useWordDefinition";
-import { AnimatedNumber } from "../ui/AnimatedNumber";
-import { useAverageSessionAccuracy } from "../../state/database/queries/useAverageAccuracy";
+import { usePracticeSession } from "../../../state/practice-session/usePracticeSession";
+import { useWordDefinition } from "../../../state/database/queries/useWordDefinition";
+import { AnimatedNumber } from "../../ui/AnimatedNumber";
+import { useAverageSessionAccuracy } from "../../../state/database/queries/useAverageAccuracy";
+import { WordsComparison } from "./WordsComparison";
 
 export const EndSessionReport = () => {
   const {
@@ -51,7 +52,7 @@ export const EndSessionReport = () => {
         Session Complete! 🎉
       </h1>
 
-      <div className="grow">
+      <div className="grow overflow-y-auto">
         <div className="grid grid-cols-2 auto-rows-auto gap-2">
           <div className="col-span-2">
             <WordCard>
@@ -75,30 +76,10 @@ export const EndSessionReport = () => {
               </div>
             </WordCard>
           </div>
-          <WordCard>
-            <div className="card-body  flex flex-col gap-2 justify-center items-center">
-              <h1 className="font-bold text-success">
-                <HandThumbUpIcon className="size-5 inline" /> Best Word
-              </h1>
-              <span className="text-6xl mashanzheng">{best.word}</span>
-              <span className="">{bestWordData.data?.pinyin ?? skeleton}</span>
-              <span className="badge badge-sm badge-success font-bold">
-                <AnimatedNumber value={best.accuracy * 100} unit="%" />
-              </span>
-            </div>
-          </WordCard>
-          <WordCard>
-            <div className="card-body flex flex-col gap-2 justify-center items-center">
-              <h1 className="font-bold text-error">
-                <HandThumbDownIcon className="size-5 inline" /> Worst Word
-              </h1>
-              <span className="text-6xl mashanzheng">{worst.word}</span>
-              <span className="">{worstWordData.data?.pinyin ?? skeleton}</span>
-              <span className="badge badge-sm badge-error font-bold">
-                <AnimatedNumber value={worst.accuracy * 100} unit="%" />
-              </span>
-            </div>
-          </WordCard>
+
+          <div className="col-span-2">
+            <WordsComparison words={stats} />
+          </div>
           <div className="col-span-2">
             <WordCard>
               <div className="card-body">
@@ -126,7 +107,7 @@ export const EndSessionReport = () => {
         </div>
       </div>
 
-      <button className="btn btn-success w-full" onClick={closeSession}>
+      <button className="btn btn-success w-full mt-3" onClick={closeSession}>
         <ArchiveBoxIcon className="size-4" /> Save and Exit
       </button>
     </div>

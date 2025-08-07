@@ -24,7 +24,7 @@ export const Overlay = ({
       <div
         style={{ zIndex: baseZ + 1 }}
         className={cn(
-          "relative p-2 grow flex justify-center items-center w-full"
+          "relative p-2 grow flex justify-center items-center w-full max-h-full"
         )}
       >
         {children}

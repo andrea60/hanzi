@@ -1,6 +1,10 @@
 import { useAtom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
-import { BucketDef, selectPracticeWords } from "./select-practice-words";
+import {
+  BucketDef,
+  BucketType,
+  selectPracticeWords,
+} from "./select-practice-words";
 import { updateWordStats } from "../database/commands/updateWordStats";
 import { getAuthenticatedUser } from "../../auth/useAuth";
 import { useMemo } from "react";
@@ -12,12 +16,15 @@ import { QueryKey } from "../database/queries/queryKey";
 export type WordPracticeStats = {
   word: string;
   accuracy: number;
+  pinyin: string;
+  prevAccuracy: number | undefined;
 };
 
 export type WordPracticeData = {
   uuid: string;
   word: string;
   pinyin: string;
+  bucketSource: BucketType;
   definitions: string[];
   avgAccuracy: number | undefined;
   practiceCount: number | undefined;
@@ -54,7 +61,7 @@ const sessionAtom = atomWithStorage<PracticeSessionState | undefined>(
 
 export const forceDeleteSession = () => {
   localStorage.removeItem(storageKey);
-}
+};
 
 export const usePracticeSession = () => {
   const [session, setSession] = useAtom(sessionAtom);
@@ -76,13 +83,19 @@ export const usePracticeSession = () => {
     });
   };
 
-  const markWordComplete = (stats: WordPracticeStats) => {
+  const markWordComplete = (accuracy: number) => {
     setSession((prev) => {
       if (!prev || prev.state !== "InProgress") return prev;
-      const [, ...queue] = prev.queue;
+      const [current, ...queue] = prev.queue;
       const completed = { ...prev.completed };
       // Add the stats only if they weren't added before. The first stats are the only significant ones
-      if (!completed[stats.word]) completed[stats.word] = stats;
+      if (!completed[current.word])
+        completed[current.word] = {
+          word: current.word,
+          accuracy,
+          pinyin: current.pinyin,
+          prevAccuracy: current.avgAccuracy,
+        };
 
       if (queue.length === 0) {
         const endTime = new Date();
@@ -106,21 +119,29 @@ export const usePracticeSession = () => {
       }
       return {
         ...prev,
-        completed: { ...prev.completed, [stats.word]: stats },
+        completed,
         queue,
       };
     });
   };
 
-  const repracticeWord = (stats: WordPracticeStats) => {
+  const repracticeWord = (accuracy: number) => {
     setSession((prev) => {
       if (!prev || prev.state !== "InProgress") return prev;
-      const [word, ...queue] = prev.queue;
+      const [current, ...queue] = prev.queue;
 
       return {
         ...prev,
-        queue: [...queue, { ...word, uuid: crypto.randomUUID() }],
-        completed: { ...prev.completed, [stats.word]: stats },
+        queue: [...queue, { ...current, uuid: crypto.randomUUID() }],
+        completed: {
+          ...prev.completed,
+          [current.word]: {
+            word: current.word,
+            accuracy,
+            pinyin: current.pinyin,
+            prevAccuracy: current.avgAccuracy,
+          },
+        },
       };
     });
   };

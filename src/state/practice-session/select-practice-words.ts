@@ -4,7 +4,11 @@ import { db, WordStatRow } from "../database/database.db";
 import { WordPracticeData } from "./usePracticeSession";
 import { getAuthenticatedUser } from "../../auth/useAuth";
 
-type BucketType = "worstAccuracy" | "leastPracticed" | "newest" | "random";
+export type BucketType =
+  | "worstAccuracy"
+  | "leastPracticed"
+  | "newest"
+  | "random";
 
 export type BucketDef = {
   weight: number;
@@ -19,18 +23,20 @@ export type WordWithStats = {
   addedAt: Date | undefined;
 };
 
+type BucketedWord = WordWithStats & { bucketSource: BucketType };
+
 export const bucketWords = (
   numWords: number,
   buckets: BucketDef[],
   wordStats: WordWithStats[]
-): WordWithStats[] => {
-  const words: Record<string, WordWithStats> = {};
+): BucketedWord[] => {
+  const words: Record<string, BucketedWord> = {};
   let totalSize = 0;
-  for (const bracket of buckets) {
+  for (const bucket of buckets) {
     if (totalSize >= numWords) break;
-    const bucketSize = Math.round(numWords * bracket.weight);
+    const bucketSize = Math.round(numWords * bucket.weight);
 
-    const sortedBucket = match(bracket.bucketType)
+    const sortedBucket = match(bucket.bucketType)
       .with("worstAccuracy", () =>
         wordStats
           .filter((w) => w.avgAccuracy !== undefined)
@@ -53,11 +59,11 @@ export const bucketWords = (
     bucketWords.forEach((bw) => {
       if (totalSize >= numWords) return;
       totalSize++;
-      words[bw.word] = bw;
+      words[bw.word] = { ...bw, bucketSource: bucket.bucketType };
     });
   }
 
-  return Object.values(words);
+  return Object.values(words).shuffle();
 };
 
 export const selectPracticeWords = async (
@@ -97,7 +103,8 @@ export const selectPracticeWords = async (
   );
 
   return wordsWithStats.reduce((result, wordWithStats) => {
-    const { word, avgAccuracy, lastPracticed, practiceCount } = wordWithStats;
+    const { word, avgAccuracy, lastPracticed, practiceCount, bucketSource } =
+      wordWithStats;
     const wordDef = wordDefs.get(word);
     if (!wordDef) return result;
 
@@ -109,17 +116,17 @@ export const selectPracticeWords = async (
       );
     }
 
-    return [
-      ...result,
-      {
-        uuid: crypto.randomUUID(),
-        word: word,
-        definitions: wordDef.definitions,
-        pinyin: wordDef.pinyin[0],
-        avgAccuracy,
-        practiceCount,
-        lastPracticed,
-      } as WordPracticeData,
-    ];
+    const entry: WordPracticeData = {
+      uuid: crypto.randomUUID(),
+      word: word,
+      definitions: wordDef.definitions,
+      pinyin: wordDef.pinyin[0],
+      avgAccuracy,
+      practiceCount,
+      lastPracticed,
+      bucketSource,
+    };
+
+    return [...result, entry];
   }, [] as WordPracticeData[]);
 };

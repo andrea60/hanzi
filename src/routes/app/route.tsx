@@ -47,7 +47,7 @@ function RouteComponent() {
         <div className="py-3 px-6 text-neutral-content">
           <h1 className="font-extrabold text-2xl flex items-center">
             <img src="/icon.svg" className="size-12 inline mr-2" />
-            <span className="mashanzheng">练汉字</span>{" "}
+            <span className="hanzi-serif">练汉字</span>{" "}
             {title ? " - " + title : null}
           </h1>
         </div>

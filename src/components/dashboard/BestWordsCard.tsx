@@ -30,7 +30,7 @@ export const BestWordsCard = () => {
           {word ? (
             <>
               <div className="mb-1">{word.pinyin}</div>
-              <div className={`text-4xl mashanzheng mb-1 whitespace-nowrap`}>
+              <div className={`text-4xl hanzi-serif mb-1 whitespace-nowrap`}>
                 {word.word}
               </div>
               <div className="badge badge-sm badge-success">

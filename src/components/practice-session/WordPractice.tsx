@@ -5,6 +5,8 @@ import { ArrowPathIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 import { CheckCircleIcon as CheckCircleIconSolid } from "@heroicons/react/24/solid";
 import { motion } from "motion/react";
 import { AccuracyBadge } from "../ui/AccuracyBadge";
+import { BucketType } from "../../state/practice-session/select-practice-words";
+import { match } from "ts-pattern";
 
 export const WordPractice = () => {
   const {
@@ -37,14 +39,14 @@ export const WordPractice = () => {
       throw new Error(
         "No accuracy data for the current word. This should not happen"
       );
-    markWordComplete({ word: currentWord.word, accuracy });
+    markWordComplete(accuracy);
   };
   const practiceAgain = () => {
     if (!accuracy)
       throw new Error(
         "No accuracy data for the current word. This should not happen"
       );
-    repracticeWord({ word: currentWord.word, accuracy });
+    repracticeWord(accuracy);
   };
 
   return (
@@ -52,7 +54,7 @@ export const WordPractice = () => {
       <progress className="progress w-full mb-2" value={progress} max="1" />
       <div>
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl mb-1">
+          <h1 className="text-2xl mb-1 grow">
             {currentWord.pinyin}
             {wordCompleted && (
               <motion.span
@@ -68,7 +70,9 @@ export const WordPractice = () => {
               </motion.span>
             )}
           </h1>
-          <AccuracyBadge accuracy={accuracy ?? 1} />
+          <span className="badge badge-sm badge-primary mr-2">
+            {bucketTypeToLabel(currentWord.bucketSource)}
+          </span>
         </div>
 
         <p className="text-xs h-6 whitespace-nowrap overflow-hidden text-ellipsis">
@@ -84,6 +88,14 @@ export const WordPractice = () => {
         />
       </div>
 
+      <div className="flex justify-between mb-2 items-center text-sm gap-2">
+        <span>
+          Avg Accuracy: <AccuracyBadge accuracy={currentWord.avgAccuracy} />
+        </span>
+        <span>
+          Accuracy: <AccuracyBadge accuracy={accuracy} />
+        </span>
+      </div>
       <div className="flex gap-2 text-sm">
         <button
           className="btn btn-warning btn-dash flex-1"
@@ -97,9 +109,17 @@ export const WordPractice = () => {
           onClick={moveToNext}
           disabled={!wordCompleted}
         >
-          <CheckCircleIcon className="size-4" /> Learned
+          <CheckCircleIcon className="size-4" /> Next Word
         </button>
       </div>
     </div>
   );
 };
+
+const bucketTypeToLabel = (type: BucketType) =>
+  match(type)
+    .with("leastPracticed", () => "Rusty Word")
+    .with("newest", () => "New Word")
+    .with("worstAccuracy", () => "Weak Word")
+    .with("random", () => "Random")
+    .exhaustive();

@@ -14,7 +14,7 @@ export const AccuracyChart = (props: Props) => {
 };
 
 const CardContent = ({ height }: Props) => {
-  const sessions = useSessionsHistory(25);
+  const sessions = useSessionsHistory(10);
   if (!sessions.data) return <p>Loading...</p>;
 
   if (sessions.data.length < 5)

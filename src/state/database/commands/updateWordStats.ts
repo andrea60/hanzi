@@ -22,10 +22,7 @@ export const updateWordStats = async (
         ...statRow,
         practiceCount: statRow.practiceCount + 1,
         lastPracticed: sessionTime,
-        avgAccuracy:
-          (statRow.avgAccuracy * statRow.practiceCount +
-            sessionWordStats.accuracy) /
-          (statRow.practiceCount + 1),
+        avgAccuracy: (statRow.avgAccuracy + sessionWordStats.accuracy) / 2,
       });
     else
       newStats.push({
