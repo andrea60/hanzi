@@ -1,4 +1,4 @@
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, useState } from "react";
 import { useAsyncEffect } from "../../utils/useAsyncEffect";
 import { ModalContentProps, useModal } from "../../components/modal/useModal";
 import { useQuery } from "@tanstack/react-query";
@@ -8,6 +8,7 @@ import { showToast } from "../../components/toastr/useToast";
 import { fetchWithProgress } from "../../utils/fetchWithProgress";
 
 export type RemoteDataSet = {
+  version: number;
   strokes: Record<
     string,
     {
@@ -46,6 +47,7 @@ const useHanziDbState = create<HanziDbState>((set) => ({
 
 export const HanziDataSetProvider = ({ children }: PropsWithChildren) => {
   const { openModal, closeModal } = useModal();
+  const [latestServerVersion, setLatestServerVersion] = useState<string>();
   const { setRequiresUpdate, setIsUpdating, setDownloadProgress } =
     useHanziDbState();
 
@@ -54,13 +56,30 @@ export const HanziDataSetProvider = ({ children }: PropsWithChildren) => {
     refetch();
   };
 
+  const { data: remoteVersion } = useQuery({
+    queryKey: ["hanzi-dataset", "version"],
+    retry: true,
+    queryFn: async () => {
+      const response = await fetch("/api/dataset/version");
+      if (response.status !== 200)
+        throw new Error(
+          `Error status code returned while fetching remote dataset version: ${response.status}, ${response.statusText}`
+        );
+      const { version } = (await response.json()) as { version: number };
+
+      return version;
+    },
+  });
+
   useAsyncEffect(async () => {
+    if (!remoteVersion) return;
     // fetch the metadata from the IndexedDB store
-    const versions = await db.versions.count();
+    const [localVersionRow] = await db.versions.toArray();
 
-    // at the moment, we don't support multiple versions so we just check for the presence of one version
-    if (versions > 0) return;
+    // if our local version is greater than remote stop
+    if (localVersionRow && localVersionRow.version >= remoteVersion) return;
 
+    // otherwise an update is required
     setRequiresUpdate(true);
     openModal({
       component: HanziDataSetUpdateModal,
@@ -69,7 +88,7 @@ export const HanziDataSetProvider = ({ children }: PropsWithChildren) => {
       force: true,
       componentProps: { startDownload },
     });
-  }, []);
+  }, [remoteVersion]);
 
   const { refetch } = useQuery({
     queryKey: ["hanzi-dataset"],
@@ -106,7 +125,8 @@ export const HanziDataSetProvider = ({ children }: PropsWithChildren) => {
       await db.strokeData.bulkAdd(strokeDataRows);
       await db.dictionary.bulkAdd(dictionaryRows);
 
-      await db.versions.add({ version: "1.0.0", date: new Date() });
+      await db.versions.clear();
+      await db.versions.add({ version: data.version, date: new Date() });
 
       showToast({
         type: "time",

@@ -12,7 +12,7 @@ export type StrokeDataRow = {
 };
 
 export type HanziVersionRow = {
-  version: string;
+  version: number;
   date: Date;
 };
 

@@ -25,7 +25,7 @@ export const BestWordsCard = () => {
   const cardsContent = cards.map((_, idx) => {
     const word = data?.[idx];
     return (
-      <div className="card card-sm card-default text-center">
+      <div key={word?.word} className="card card-sm card-default text-center">
         <div className="card-body flex items-center">
           {word ? (
             <>

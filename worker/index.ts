@@ -1,30 +1,61 @@
 import { env } from "cloudflare:workers";
 
-const versionPathRegex = /\/api\/dataset\/latest.json.gz\/*$/;
+const downloadPathRegex = /\/api\/dataset\/latest.json.gz\/*$/;
+const getVersionPathRegex = /\/api\/dataset\/version$/;
+
+const getDatasetMetadata = (item: R2Object) => {
+  const versionRegex = /dataset-(\d+)\.json/;
+  const [, version] = item.key.match(versionRegex) || [];
+  if (!version) return null;
+  return {
+    item,
+    version: Number(version),
+  };
+};
+
 export default {
   async fetch(request: Request) {
     const url = new URL(request.url);
 
-    if (url.pathname.match(versionPathRegex)) {
+    // Get latest version metadata
+    if (url.pathname.match(getVersionPathRegex)) {
       const datasets = await env.DATASETS_BUCKET.list();
 
       const latest = datasets.objects
-        .sort((a, b) => a.key.localeCompare(b.key))
+        .map(getDatasetMetadata)
+        .filter((i) => !!i)
+        .sort((a, b) => (a.version < b.version ? -1 : 1))
+        .pop();
+
+      if (!latest)
+        return new Response("No datasets available", { status: 404 });
+
+      return Response.json({ version: Number(latest.version) });
+    }
+
+    // Dataset download
+    if (url.pathname.match(downloadPathRegex)) {
+      const datasets = await env.DATASETS_BUCKET.list();
+
+      const latest = datasets.objects
+        .map(getDatasetMetadata)
+        .filter((i) => !!i)
+        .sort((a, b) => (a.version < b.version ? -1 : 1))
         .pop();
 
       if (!latest)
         return new Response("No datasets available", { status: 404 });
 
       const versionRegex = /dataset-(\d+)\.json/;
-      const [, version] = latest.key.match(versionRegex) || [];
+      const [, version] = latest.item.key.match(versionRegex) || [];
 
-      const dataset = await env.DATASETS_BUCKET.get(latest.key);
+      const dataset = await env.DATASETS_BUCKET.get(latest.item.key);
       if (!dataset)
         return new Response("Dataset disappeared during request processing", {
           status: 500,
         });
       console.log(
-        `Serving dataset version ${version} from ${latest.key} (size: ${dataset.size} bytes)`
+        `Serving dataset version ${version} from ${latest.item.key} (size: ${dataset.size} bytes)`
       );
       return new Response(dataset.body, {
         status: 200,

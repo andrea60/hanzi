@@ -14,16 +14,6 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
-      throwOnError(error) {
-        showToast({
-          content: error.message,
-          type: "time",
-          severity: "error",
-          title: "Un unexpected error occured",
-        });
-
-        return false;
-      },
       networkMode: "always",
     },
   },

@@ -3,8 +3,37 @@ import path from "path";
 import { fileURLToPath } from "url";
 import toPinyinTone from "pinyin-tone";
 import { exec } from "child_process";
+import { exit } from "process";
 
 const distinct = (input) => Array.from(new Set(input).values());
+
+const isClassifier = (def) => def.startsWith("CL:");
+
+const isChineseChar = (char) => {
+  return /[\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF]/.test(char);
+};
+
+const isChineseReference = (def) => {
+  return def.split("").some(isChineseChar);
+};
+
+const removeInnerParenthesis = (str) => {
+  // If the whole string is one big (...) block, keep it
+  if (/^\([^()]*\)$/.test(str.trim())) {
+    return str;
+  }
+  // Otherwise, remove all (...) blocks
+  return str.replace(/\([^()]*\)/g, "");
+};
+
+const removeInnerBrackets = (str) => {
+  // If the whole string is one big [...] block, keep it
+  if (/^\[[^\[\]]*\]$/.test(str.trim())) {
+    return str;
+  }
+  // Otherwise, remove all [...] blocks
+  return str.replace(/\[[^\[\]]*\]/g, "");
+};
 
 const [, , versionStr, remoteFlag] = process.argv;
 if (!versionStr || isNaN(Number(versionStr)))
@@ -48,9 +77,22 @@ function readCedict(file) {
     if (match) {
       const [, , simplified, pinyin, definitions] = match;
 
+      const cleanedDefinitions = definitions
+        .split("/")
+        .map(removeInnerParenthesis)
+        .map(removeInnerBrackets)
+        .map((w) => w.trim())
+        .filter((d) => d && !isClassifier(d));
+
+      if (cleanedDefinitions.length == 0) {
+        console.warn(
+          `Word ${simplified} does not have a definition. Original defs: ${definitions}`
+        );
+        continue;
+      }
       entries.push({
         simplified,
-        definitions: definitions.split("/").filter((d) => d),
+        definitions: cleanedDefinitions,
         pinyin: toPinyinTone(pinyin.toLowerCase()),
       });
     } else console.warn("Could not parse line: '", line, "'");
@@ -110,7 +152,7 @@ for (const entry of cedictData) {
 
   const newEntry = {
     pinyin: distinct([...existingEntry.pinyin, entry.pinyin]),
-    defs: [...existingEntry.defs, ...entry.definitions],
+    defs: distinct([...existingEntry.defs, ...entry.definitions]),
   };
 
   dictionaryData[entry.simplified] = newEntry;
@@ -163,6 +205,7 @@ const targetFileName = `dataset-${version}.json`;
 const outputPath = path.join(outputDir, targetFileName);
 console.log("Writing to ", outputPath);
 writeAsJson(outputPath, {
+  version,
   strokes: strokeData,
   dictionary: dictionaryData,
 });
