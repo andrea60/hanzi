@@ -229,13 +229,22 @@ const getAvgAccuracy = (stats: WordPracticeStats[]) => {
   );
 };
 
-const computeStats = (
+export const computeStats = (
   wordData: WordPracticeData,
   accuracy: number
 ): WordPracticeStats => {
-  const newAvgAccuracy = wordData.avgAccuracy
-    ? (wordData.avgAccuracy + accuracy) / 2
-    : accuracy;
+  if (wordData.avgAccuracy === undefined || !wordData.practiceCount)
+    return {
+      word: wordData.word,
+      pinyin: wordData.pinyin,
+      sessionAccuracy: accuracy,
+      prevAvgAccuracy: wordData.avgAccuracy,
+      newAvgAccuracy: accuracy,
+    };
+
+  const newAvgAccuracy =
+    (wordData.avgAccuracy * wordData.practiceCount + accuracy) /
+    (wordData.practiceCount + 1);
 
   return {
     word: wordData.word,

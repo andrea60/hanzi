@@ -3,7 +3,7 @@ import { HanziWriterReport } from "./HanziCharacterWriter";
 export const getAccuracy = (report: HanziWriterReport): number => {
   return accuracyFn({
     ...report,
-    hintsPenalty: 1,
+    hintsPenalty: 3,
     mistakesPenalty: 0.5,
   });
 };

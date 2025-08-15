@@ -54,7 +54,7 @@ export const bucketWords = (
           .filter((w) => w.lastPracticed)
           .sortBy((w) => w.lastPracticed!.valueOf(), "asc")
       )
-      .with("random", () => wordStats)
+      .with("random", () => wordStats.shuffle())
       .exhaustive();
 
     const bucketWords = sortedBucket

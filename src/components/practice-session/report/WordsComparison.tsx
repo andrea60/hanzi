@@ -14,6 +14,7 @@ import {
 } from "@heroicons/react/24/solid";
 import { useMemo } from "react";
 import { match } from "ts-pattern";
+import classNames from "classnames";
 
 type Props = {
   words: WordPracticeStats[];
@@ -34,8 +35,9 @@ export const WordsComparison = ({ words }: Props) => {
 
 type CardProps = {
   word: WordPracticeStats;
+  className?: string;
 };
-const WordComparisonCard = ({ word }: CardProps) => {
+const WordComparisonCard = ({ word, className }: CardProps) => {
   const comparison = match(word)
     .with({ prevAvgAccuracy: undefined }, () => <span>New Word!</span>)
     .when(
@@ -67,7 +69,7 @@ const WordComparisonCard = ({ word }: CardProps) => {
     )
     .run();
   return (
-    <div className="card card-default card-sm">
+    <div className={classNames("card card-default card-sm", className)}>
       <div className="card-body grid grid-cols-[1fr_min-content] grid-rows-[1fr_min-content] gap-0">
         <div className="text-lg">
           <span className="hanzi-serif text-xl">{word.word}</span> {word.pinyin}

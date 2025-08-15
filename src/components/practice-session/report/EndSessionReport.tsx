@@ -55,57 +55,52 @@ export const EndSessionReport = () => {
       </h1>
 
       <div className="grow overflow-y-auto">
-        <div className="grid grid-cols-2 auto-rows-auto gap-2">
-          <div className="col-span-2">
-            <WordCard>
-              <div className="card-body flex flex-row">
-                <div className="flex-1">
-                  <label className="text-base-content/75">
-                    Average Accuracy
-                  </label>
-                  <p className="mb-1">
-                    <AnimatedNumber
-                      className="text-3xl font-bold"
-                      value={avgAccuracyPerc}
-                    />
-                    /100
-                  </p>
-                  <AccuracyComparer avgAccuracy={avgAccuracy} />
-                </div>
-                <div className="flex items-center">
-                  <RadialProgress size={4} progress={avgAccuracyPerc} />
-                </div>
+        <div className="flex flex-col gap-2">
+          <WordCard>
+            <div className="card-body flex flex-row">
+              <div className="flex-1">
+                <label className="text-base-content/75">Average Accuracy</label>
+                <p className="mb-1">
+                  <AnimatedNumber
+                    className="text-3xl font-bold"
+                    value={avgAccuracyPerc}
+                  />
+                  /100
+                </p>
+                <AccuracyComparer avgAccuracy={avgAccuracy} />
               </div>
-            </WordCard>
-          </div>
+              <div className="flex items-center">
+                <RadialProgress size={4} progress={avgAccuracyPerc} />
+              </div>
+            </div>
+          </WordCard>
 
-          <div className="col-span-2">
-            <WordsComparison words={stats} />
-          </div>
-          <div className="col-span-2">
-            <WordCard>
-              <div className="card-body">
-                <label className="text-base-content/75">Time Taken</label>
-                <div className="flex flex-row gap-2 items-center justify-between">
-                  <div>
-                    <AnimatedNumber
-                      value={timeTakenSeconds / 60}
-                      className="text-4xl mr-1 font-bold"
-                    />
-                    minutes
-                  </div>
-                  <div>
-                    <AnimatedNumber
-                      value={secondsPerWord}
-                      className="text-4xl mr-1 font-bold"
-                    />
-                    sec/word
-                  </div>
-                  <ClockIcon className="size-12" />
+          <h1 className="text-xs">Words You Practiced:</h1>
+          <WordsComparison words={stats} />
+
+          <h1 className="text-xs">Session Time:</h1>
+          <WordCard>
+            <div className="card-body">
+              <label className="text-base-content/75">Time Taken</label>
+              <div className="flex flex-row gap-2 items-center justify-between">
+                <div>
+                  <AnimatedNumber
+                    value={timeTakenSeconds / 60}
+                    className="text-4xl mr-1 font-bold"
+                  />
+                  minutes
                 </div>
+                <div>
+                  <AnimatedNumber
+                    value={secondsPerWord}
+                    className="text-4xl mr-1 font-bold"
+                  />
+                  sec/word
+                </div>
+                <ClockIcon className="size-12" />
               </div>
-            </WordCard>
-          </div>
+            </div>
+          </WordCard>
         </div>
       </div>
 

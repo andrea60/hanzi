@@ -29,6 +29,28 @@ export const HanziCharacterWriter = (props: Props) => {
   const writerInstance = useRef<HanziWriter>(null);
   const strokesNumber = useRef<number>(null);
 
+  useEffect(() => {
+    if (!strokesNumber.current) return;
+    props.onAccuracyChange?.(
+      getAccuracy({
+        hints,
+        mistakes,
+        strokes: strokesNumber.current!,
+      })
+    );
+  }, [currentStroke, hints, mistakes]);
+
+  useEffect(() => {
+    if (!isCompleted) return;
+    props.onComplete(
+      getAccuracy({
+        hints,
+        mistakes,
+        strokes: strokesNumber.current!,
+      })
+    );
+  }, [isCompleted]);
+
   useAsyncEffect(async () => {
     if (!containerRef.current || writerInstance.current) return;
     writerInstance.current = HanziWriter.create(
@@ -48,6 +70,7 @@ export const HanziCharacterWriter = (props: Props) => {
         highlightCompleteColor: "#DAC99F",
         strokeColor: "#73350E",
         outlineColor: "#DAC99F",
+        acceptBackwardsStrokes: true,
         charDataLoader: async () => {
           const strokeData = await db.strokeData.get(char);
           if (!strokeData)
@@ -55,34 +78,12 @@ export const HanziCharacterWriter = (props: Props) => {
           return strokeData?.strokes as CharacterJson;
         },
         onCorrectStroke: (data) => {
-          props.onAccuracyChange?.(
-            getAccuracy({
-              hints,
-              mistakes: data.totalMistakes,
-              strokes: strokesNumber.current!,
-            })
-          );
           setCurrentStroke(data.strokeNum + 1);
         },
         onMistake(strokeData) {
-          props.onAccuracyChange?.(
-            getAccuracy({
-              hints,
-              mistakes: strokeData.totalMistakes,
-              strokes: strokesNumber.current!,
-            })
-          );
           setMistakes(strokeData.totalMistakes);
         },
         onComplete: (summary) => {
-          props.onComplete(
-            getAccuracy({
-              hints,
-              mistakes: summary.totalMistakes,
-              strokes: strokesNumber.current!,
-            })
-          );
-
           setMistakes(summary.totalMistakes);
           setIsCompleted(true);
         },
@@ -97,7 +98,8 @@ export const HanziCharacterWriter = (props: Props) => {
   }, [char, containerRef.current]);
 
   const showNextStroke = () => {
-    writerInstance.current?.highlightStroke(currentStroke);
+    writerInstance.current?.showOutline();
+    setTimeout(() => writerInstance.current?.hideOutline(), 500);
     setHints((x) => x + 1);
     props.onAccuracyChange?.(
       getAccuracy({
