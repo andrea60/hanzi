@@ -5,7 +5,7 @@ import { ArrowPathIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 import { CheckCircleIcon as CheckCircleIconSolid } from "@heroicons/react/24/solid";
 import { motion } from "motion/react";
 import { AccuracyBadge } from "../ui/AccuracyBadge";
-import { BucketType } from "../../state/practice-session/select-practice-words";
+import { BucketType } from "../../state/practice-session/PracticeScheduler";
 import { match } from "ts-pattern";
 
 export const WordPractice = () => {
@@ -51,7 +51,6 @@ export const WordPractice = () => {
 
   return (
     <div className="grow flex flex-col">
-      <progress className="progress w-full mb-2" value={progress} max="1" />
       <div>
         <div className="flex justify-between items-center">
           <h1 className="text-2xl mb-1 grow">

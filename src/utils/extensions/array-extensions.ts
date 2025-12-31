@@ -3,6 +3,8 @@ declare global {
     average(): number | undefined;
     sortByProperty<K extends keyof T>(key: K, dir: "asc" | "desc"): T[];
     sortBy(selector: (item: T) => any, dir: "asc" | "desc"): T[];
+    min(selector: (item: T) => number): number;
+    max(selector: (item: T) => number): number;
     shuffle(): T[];
   }
 }
@@ -44,4 +46,26 @@ Array.prototype.shuffle = function <T>(): T[] {
     [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
   }
   return newArray;
+};
+
+Array.prototype.min = function <T>(selector: (item: T) => number) {
+  if (this.length === 0) return NaN;
+  let min = selector(this[0]);
+  for (let i = 1; i < this.length; i++) {
+    const val = selector(this[i]);
+    if (val < min) min = val;
+  }
+
+  return min;
+};
+
+Array.prototype.max = function <T>(selector: (item: T) => number) {
+  if (this.length === 0) return NaN;
+  let max = selector(this[0]);
+  for (let i = 1; i < this.length; i++) {
+    const val = selector(this[i]);
+    if (val > max) max = val;
+  }
+
+  return max;
 };

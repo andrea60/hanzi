@@ -1,10 +1,6 @@
 import { useAtom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
-import {
-  BucketDef,
-  BucketType,
-  selectPracticeWords,
-} from "./select-practice-words";
+
 import { updateWordStats } from "../database/commands/updateWordStats";
 import { getAuthenticatedUser } from "../../auth/useAuth";
 import { useMemo } from "react";
@@ -12,27 +8,41 @@ import { saveSessionStats } from "../database/commands/saveSessionStats";
 import { showToast } from "../../components/toastr/useToast";
 import { useQueryClient } from "@tanstack/react-query";
 import { QueryKey } from "../database/queries/queryKey";
+import { db } from "../database/database.db";
+import { toGroup } from "../../utils/toGroup";
+import { toRecord } from "../../utils/toRecord";
+import { DefaultPracticeScheduler } from "./PracticeScheduler";
 
-export type WordPracticeStats = {
+export type PracticeMode = "write" | "memo";
+
+export type SkillPracticeResult =
+  | "success"
+  | "partial-success"
+  | "failure"
+  | "skipped";
+
+export type WordPracticeResult = {
   word: string;
   pinyin: string;
-  /** The accuracy specific to this session */
-  sessionAccuracy: number;
-  /** Average accuracy of previous session */
-  prevAvgAccuracy: number | undefined;
-  /** Average accuracy after this session */
-  newAvgAccuracy: number;
+  objective: Skill;
+  result: SkillPracticeResult;
 };
+
+export type Skill = "read" | "write" | "type-pinyi" | "type-hanzi";
+export const ALL_SKILLS: Skill[] = [
+  "read",
+  "write",
+  "type-pinyi",
+  "type-hanzi",
+];
 
 export type WordPracticeData = {
   uuid: string;
   word: string;
   pinyin: string;
-  bucketSource: BucketType;
   definitions: string[];
-  avgAccuracy: number | undefined;
-  practiceCount: number | undefined;
-  lastPracticed: Date | undefined;
+  objective: Skill;
+  urgency: number;
 };
 
 type InProgressSessionState = {
@@ -41,16 +51,15 @@ type InProgressSessionState = {
   totalWords: number;
   queue: WordPracticeData[];
   startTime: string;
-  completed: Record<string, WordPracticeStats>;
+  completed: Record<string, WordPracticeResult>;
 };
 
 type CompletedSessionState = {
   state: "Completed";
   id: string;
   totalWords: number;
-  avgAccuracy: number;
   timeTakenSeconds: number;
-  stats: WordPracticeStats[];
+  stats: WordPracticeResult[];
   startTime: string;
   endTime: string;
 };
@@ -71,11 +80,13 @@ export const usePracticeSession = () => {
   const [session, setSession] = useAtom(sessionAtom);
   const queryClient = useQueryClient();
 
-  const startSession = async (numWords: number, buckets: BucketDef[]) => {
+  const startSession = async (numWords: number, skills: Skill[]) => {
     if (session) throw new Error("Session already in progress");
+    const user = getAuthenticatedUser();
 
     // get the random words from the database
-    const words = await selectPracticeWords(numWords, buckets);
+    const scheduler = new DefaultPracticeScheduler(user.uid);
+    const words = await scheduler.nextWords(numWords, skills);
 
     setSession({
       state: "InProgress",
@@ -87,14 +98,19 @@ export const usePracticeSession = () => {
     });
   };
 
-  const markWordComplete = (accuracy: number) => {
+  const markWordComplete = (result: SkillPracticeResult) => {
     setSession((prev) => {
       if (!prev || prev.state !== "InProgress") return prev;
       const [current, ...queue] = prev.queue;
       const completed = { ...prev.completed };
       // Add the stats only if they weren't added before. The first stats are the only significant ones
-      if (!completed[current.word]) {
-        completed[current.word] = computeStats(current, accuracy);
+      if (!completed[statKey(current)]) {
+        completed[statKey(current)] = {
+          result,
+          word: current.word,
+          pinyin: current.pinyin,
+          objective: current.objective,
+        };
       }
 
       if (queue.length === 0) {
@@ -104,12 +120,10 @@ export const usePracticeSession = () => {
           (endTime.valueOf() - startTime.valueOf()) / 1000;
 
         const stats = Object.values(completed);
-        const avgAccuracy = getAvgAccuracy(stats);
         // session completed
         return {
           state: "Completed",
           timeTakenSeconds,
-          avgAccuracy,
           stats,
           startTime: prev.startTime,
           endTime: endTime.toISOString(),
@@ -125,7 +139,7 @@ export const usePracticeSession = () => {
     });
   };
 
-  const repracticeWord = (accuracy: number) => {
+  const repracticeWord = (result: SkillPracticeResult) => {
     setSession((prev) => {
       if (!prev || prev.state !== "InProgress") return prev;
       const [current, ...queue] = prev.queue;
@@ -135,7 +149,12 @@ export const usePracticeSession = () => {
         queue: [...queue, { ...current, uuid: crypto.randomUUID() }],
         completed: {
           ...prev.completed,
-          [current.word]: computeStats(current, accuracy),
+          [statKey(current)]: {
+            result,
+            word: current.word,
+            pinyin: current.pinyin,
+            objective: current.objective,
+          },
         },
       };
     });
@@ -152,9 +171,9 @@ export const usePracticeSession = () => {
         session.id,
         startTime,
         session.timeTakenSeconds,
-        session.avgAccuracy,
         session.stats.map((s) => s.word),
-        user.uid
+        user.uid,
+        session.stats
       );
     } catch (error) {
       if (error instanceof Error)
@@ -209,7 +228,6 @@ export const usePracticeSession = () => {
     isCompleted: true,
     isRunning: true,
     stats: session.stats,
-    avgAccuracy: session.avgAccuracy,
     timeTakenSeconds: session.timeTakenSeconds,
   } as const;
 };
@@ -221,36 +239,4 @@ const getProgress = (state: InProgressSessionState): number => {
   return completedCount / state.totalWords;
 };
 
-const getAvgAccuracy = (stats: WordPracticeStats[]) => {
-  if (stats.length === 1) return stats[0].sessionAccuracy;
-
-  return (
-    stats.map((s) => s.sessionAccuracy).reduce((c, n) => c + n) / stats.length
-  );
-};
-
-export const computeStats = (
-  wordData: WordPracticeData,
-  accuracy: number
-): WordPracticeStats => {
-  if (wordData.avgAccuracy === undefined || !wordData.practiceCount)
-    return {
-      word: wordData.word,
-      pinyin: wordData.pinyin,
-      sessionAccuracy: accuracy,
-      prevAvgAccuracy: wordData.avgAccuracy,
-      newAvgAccuracy: accuracy,
-    };
-
-  const newAvgAccuracy =
-    (wordData.avgAccuracy * wordData.practiceCount + accuracy) /
-    (wordData.practiceCount + 1);
-
-  return {
-    word: wordData.word,
-    pinyin: wordData.pinyin,
-    sessionAccuracy: accuracy,
-    prevAvgAccuracy: wordData.avgAccuracy,
-    newAvgAccuracy,
-  };
-};
+const statKey = (w: WordPracticeData) => `${w.objective}-${w.word}`;

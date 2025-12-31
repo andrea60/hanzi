@@ -5,7 +5,10 @@ import {
 } from "@heroicons/react/24/outline";
 import { Link } from "@tanstack/react-router";
 import { FaceFrownIcon } from "@heroicons/react/24/outline";
-import { usePracticeSession } from "../../state/practice-session/usePracticeSession";
+import {
+  PracticeMode,
+  usePracticeSession,
+} from "../../state/practice-session/usePracticeSession";
 import { usePageTitle } from "../../utils/PageTitleProvider";
 import { MinusIcon, PlusIcon } from "@heroicons/react/24/solid";
 import { atomWithStorage } from "jotai/utils";
@@ -16,8 +19,9 @@ import {
   MultiProgression,
   MultiProgressionStage,
 } from "../ui/MultiProgression";
-import { BucketDef } from "../../state/practice-session/select-practice-words";
+import { BucketDef } from "../../state/practice-session/PracticeScheduler";
 import { match } from "ts-pattern";
+import { useState } from "react";
 
 export const PracticeSessionConfiguration = () => {
   usePageTitle("Practice Session", []);
@@ -28,9 +32,13 @@ export const PracticeSessionConfiguration = () => {
   if (favouritesCount === undefined) return <p>Loading...</p>;
   if (isRunning) return <RunningSessionPlaceholder />;
 
-  const handleOnStart = (numWords: number, buckets: BucketDef[]) => {
+  const handleOnStart = (
+    numWords: number,
+    buckets: BucketDef[],
+    mode: PracticeMode
+  ) => {
     if (isRunning) return;
-    startSession(numWords, buckets);
+    startSession(numWords, buckets, mode);
   };
   return (
     <div className="flex flex-col h-full">
@@ -64,10 +72,15 @@ const practiceTemplateAtom = atomWithStorage<string>(
 );
 type Props = {
   totalWordsCount: number;
-  onStart: (numWords: number, bucketDefs: BucketDef[]) => void;
+  onStart: (
+    numWords: number,
+    bucketDefs: BucketDef[],
+    mode: PracticeMode
+  ) => void;
 };
 const SessionConfigurator = ({ totalWordsCount, onStart }: Props) => {
   const [numWords, setNumWords] = useAtom(numWordsAtom);
+  const [mode, setMode] = useState<PracticeMode>("memo");
   const [selectedTemplateName, setSelectedTemplateName] =
     useAtom(practiceTemplateAtom);
   const selectedTemplated = PracticeTemplates[selectedTemplateName];
@@ -88,15 +101,19 @@ const SessionConfigurator = ({ totalWordsCount, onStart }: Props) => {
               type="radio"
               name="practiceMode"
               className="tab flex-1"
-              aria-label="Practice Writing"
-              defaultChecked
+              aria-label="Characters Memorization"
+              value="memo"
+              checked={mode === "memo"}
+              onChange={(e) => setMode(e.currentTarget.value as PracticeMode)}
             />
             <input
               type="radio"
               name="practiceMode"
               className="tab flex-1"
-              aria-label="Practice Reading"
-              disabled
+              aria-label="Hand Writing"
+              value="write"
+              checked={mode === "write"}
+              onChange={(e) => setMode(e.currentTarget.value as PracticeMode)}
             />
           </div>
         </div>
@@ -110,8 +127,7 @@ const SessionConfigurator = ({ totalWordsCount, onStart }: Props) => {
               <MinusIcon className="size-6" />
             </button>
             <div>
-              <span className="text-4xl font-bold mr-1">{numWords}</span>
-              words
+              <span className="text-2xl font-bold mr-1">{numWords}</span>
             </div>
             <button
               className="btn btn-ghost btn-xl rounded-r-full"
@@ -146,7 +162,7 @@ const SessionConfigurator = ({ totalWordsCount, onStart }: Props) => {
 
         <button
           className="btn btn-primary w-full mt-auto mb-2 self-end"
-          onClick={() => onStart(numWords, selectedTemplated.buckets)}
+          onClick={() => onStart(numWords, selectedTemplated.buckets, mode)}
         >
           <BookOpenIcon className="size-6" /> Let's Start!
         </button>

@@ -2,7 +2,7 @@ import {
   ArrowRightCircleIcon,
   ChevronRightIcon,
 } from "@heroicons/react/24/outline";
-import { WordPracticeStats } from "../../../state/practice-session/usePracticeSession";
+import { WordPracticeResult } from "../../../state/practice-session/usePracticeSession";
 import { AccuracyBadge } from "../../ui/AccuracyBadge";
 import {
   ArrowDownCircleIcon,
@@ -17,7 +17,7 @@ import { match } from "ts-pattern";
 import classNames from "classnames";
 
 type Props = {
-  words: WordPracticeStats[];
+  words: WordPracticeResult[];
 };
 export const WordsComparison = ({ words }: Props) => {
   const sortedWords = useMemo(
@@ -34,7 +34,7 @@ export const WordsComparison = ({ words }: Props) => {
 };
 
 type CardProps = {
-  word: WordPracticeStats;
+  word: WordPracticeResult;
   className?: string;
 };
 const WordComparisonCard = ({ word, className }: CardProps) => {

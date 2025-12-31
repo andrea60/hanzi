@@ -1,4 +1,4 @@
-import { BucketDef } from "../../state/practice-session/select-practice-words";
+import { BucketDef } from "../../state/practice-session/PracticeScheduler";
 
 type TemplateDef = {
   name: string;

@@ -1,9 +1,9 @@
-import { WordPracticeStats } from "../../practice-session/usePracticeSession";
+import { WordPracticeResult } from "../../practice-session/usePracticeSession";
 import { db, WordStatRow } from "../database.db";
 
 export const updateWordStats = async (
   userId: string,
-  wordStats: WordPracticeStats[],
+  wordStats: WordPracticeResult[],
   sessionTime: Date
 ) => {
   const currentStats = await db.wordStats

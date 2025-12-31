@@ -1,4 +1,6 @@
 import Dexie from "dexie";
+import { Skill } from "../practice-session/usePracticeSession";
+import { WordSkillStats } from "../practice-session/PracticeScheduler";
 
 export type DictionaryRow = {
   word: string;
@@ -24,17 +26,19 @@ export type UserFavouriteRow = {
 
 export type WordStatRow = {
   word: string;
+  skill: Skill;
   userId: string;
-  practiceCount: number;
-  lastPracticed: Date;
-  avgAccuracy: number;
+  totalCount: number;
+  successes: number;
+  partialSuccesses: number;
+  failures: number;
+  lastPracticedAt: Date;
 };
 
 export type SessionRow = {
   id: string;
   userId: string;
   timestamp: Date;
-  avgAccuracy: number;
   words: string[];
   timeTakenSeconds: number;
 };
@@ -43,7 +47,7 @@ export const db = new Dexie("hanzi") as Dexie & {
   dictionary: Dexie.Table<DictionaryRow>;
   versions: Dexie.Table<HanziVersionRow>;
   favourites: Dexie.Table<UserFavouriteRow>;
-  wordStats: Dexie.Table<WordStatRow>;
+  wordSkillStats: Dexie.Table<WordStatRow>;
   sessions: Dexie.Table<SessionRow>;
 };
 db.version(2).stores({
@@ -51,6 +55,6 @@ db.version(2).stores({
   dictionary: "word, searchablePinyin",
   versions: "version, date",
   favourites: "[word+userId], userId, addedAt",
-  wordStats: "[word+userId], userId, [userId+avgAccuracy]",
+  wordSkillStats: "[word+userId], [word+skill+userId], userId",
   sessions: "[id+userId], userId",
 });

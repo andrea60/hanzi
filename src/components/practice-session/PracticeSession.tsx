@@ -7,6 +7,10 @@ import { useConfirm } from "../modal/useConfirm";
 import { WordPractice } from "./WordPractice";
 import { EndSessionReport } from "./report/EndSessionReport";
 import { ErrorBoundary, ErrorHandlerComponent } from "../ErrorBoundary";
+import { match } from "ts-pattern";
+import { HanziReader } from "./HanziReader";
+import { HanziTyper } from "./HanziTyper";
+import { PinyinTyper } from "./PinyinTyper";
 
 export const PracticeSession = () => {
   const session = usePracticeSession();
@@ -22,6 +26,14 @@ export const PracticeSession = () => {
     if (userConfirmation) session.discardSession();
   };
 
+  const Content = match(session.currentWord)
+    .with(undefined, () => () => undefined)
+    .with({ objective: "write" }, () => WordPractice)
+    .with({ objective: "read" }, () => HanziReader)
+    .with({ objective: "type-hanzi" }, () => HanziTyper)
+    .with({ objective: "type-pinyi" }, () => PinyinTyper)
+    .exhaustive();
+
   return (
     <div className="rounded-lg p-6 h-full max-h-full w-full bg-base-200 flex flex-col overflow-y-hidden">
       <ErrorBoundary handler={ErrorHandler}>
@@ -32,7 +44,16 @@ export const PracticeSession = () => {
             onClick={handleExitClick}
           />
         )}
-        {session.isCompleted ? <EndSessionReport /> : <WordPractice />}
+        <progress
+          className="progress w-full mb-2"
+          value={session.progress}
+          max="1"
+        />
+        {session.isCompleted ? (
+          <EndSessionReport />
+        ) : (
+          <Content key={session.currentWord?.uuid} />
+        )}
       </ErrorBoundary>
     </div>
   );

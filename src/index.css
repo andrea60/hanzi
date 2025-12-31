@@ -99,4 +99,8 @@ body, html, #root {
 
 
 
+/** CUSTOM CSS CLASSES **/
 
+.word-box { 
+  @apply border bg-base-100 rounded-xl p-4 border-base-300 shadow-[0_.1rem_.5rem_-.3rem_#0003];
+}
