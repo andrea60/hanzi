@@ -2,7 +2,7 @@ import "../../src/utils/extensions";
 import readline from "node:readline";
 import { SimulationPlotter } from "./plot-simulation.ts";
 import { InMemoryPracticeScheduler } from "./sim-practice-scheduler.ts";
-import { SimulatedUser, User } from "./sim-user.ts";
+import { SimulatedUser } from "./sim-user.ts";
 import { daysSince } from "../../src/utils/daysSince.ts";
 import { ALL_SKILLS } from "../../src/state/practice-session/usePracticeSession.ts";
 import { toMap } from "../../src/utils/toMap.ts";
@@ -49,7 +49,7 @@ const scheduler = new InMemoryPracticeScheduler(
   "test-user",
   INITIAL_WORDS
 );
-const user = new SimulatedUser(time);
+const user = new SimulatedUser(time, new Map([["type-hanzi", 1]]));
 const plotter = new SimulationPlotter();
 
 do {
@@ -58,6 +58,7 @@ do {
 
     for (let y = 0; y < SESSIONS_PER_DAY; y++) {
       const result = await scheduler.nextWords(SESSION_SIZE);
+
       for (const wordData of result) {
         const metrics = user.practice(wordData.word, wordData.objective);
         scheduler.recordStats(wordData.word, wordData.objective, metrics);

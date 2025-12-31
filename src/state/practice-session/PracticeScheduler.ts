@@ -7,7 +7,7 @@ import {
   Skill,
   WordPracticeData,
 } from "./usePracticeSession";
-import { computeUrgencyScore, skillStrength } from "./computeUrgencyScore";
+import { computeSkillUrgencyScore, skillStrength } from "./computeUrgencyScore";
 import { toGroup } from "../../utils/toGroup";
 import { toRecord } from "../../utils/toRecord";
 
@@ -55,7 +55,7 @@ export abstract class PracticeScheduler {
       (r) => r.word
     );
 
-    const wordsWithUrgency = pool.map((f) => {
+    const wordsSkillsWithUrgency = pool.flatMap((f) => {
       const wordStats = wordStatsMap.get(f.word) ?? [];
       const lastPracticedAt = wordStats.length
         ? new Date(wordStats.max((s) => s.lastPracticedAt.valueOf()))
@@ -67,15 +67,24 @@ export abstract class PracticeScheduler {
         lastPracticedAt,
       };
 
-      const urgency = computeUrgencyScore(word, skills, this.getNow());
-
-      return { ...word, urgency };
+      return ALL_SKILLS.map((skill) => ({
+        ...word,
+        skill,
+        urgency: computeSkillUrgencyScore(word, skill, this.getNow()),
+      }));
     });
 
     // Take only the top N most urgent words
-    const wordsToPractice = wordsWithUrgency
-      .sortByProperty("urgency", "desc")
-      .slice(0, numWords);
+    const wordsToPractice = [];
+    for (const wordSkill of wordsSkillsWithUrgency.sortByProperty(
+      "urgency",
+      "desc"
+    )) {
+      // if buffer is full, stop looking for new words
+      if (wordsToPractice.length >= numWords) break;
+
+      wordsToPractice.push(wordSkill);
+    }
 
     const wordDefs = toMap(
       await this.getDefinitions(wordsToPractice.map((w) => w.word)),
@@ -100,7 +109,7 @@ export abstract class PracticeScheduler {
         definitions: wordDef.definitions,
         pinyin: wordDef.pinyin[0],
         urgency: wordWithStats.urgency,
-        objective: this.selectSkillToPractice(wordWithStats),
+        objective: wordWithStats.skill,
       };
 
       return [...result, entry];

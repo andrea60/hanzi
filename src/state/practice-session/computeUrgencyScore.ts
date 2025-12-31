@@ -1,4 +1,5 @@
 import { daysSince } from "../../utils/daysSince";
+import { random } from "../../utils/random";
 import { WordSkillStats, WordWithStats } from "./PracticeScheduler";
 import { Skill } from "./usePracticeSession";
 
@@ -9,17 +10,32 @@ const SKILL_WEIGHTS: Record<Skill, number> = {
   write: 0.25,
 };
 // Maybe should this compute the `skillUrgencyScore`? And then I can have multiple times the same word in a session
-export const computeUrgencyScore = (
+export const computeSkillUrgencyScore = (
   word: WordWithStats,
-  skills: Skill[],
+  skill: Skill,
   now: Date
 ): number => {
-  const strength = wordStrength(word, skills);
+  const skillStats = word.skillStats[skill];
 
-  const forgetting = forgettingFactor(word, strength, now);
+  const strengthMultiplier = calculateStrengthMultiplier(
+    skillStats?.totalCount ?? 0
+  );
+  const strength = skillStrength(skillStats) * strengthMultiplier;
+
+  const forgetting = forgettingFactor(
+    skillStats?.lastPracticedAt,
+    strength,
+    now
+  );
   const novelty = noveltyFactor(word, now);
 
-  return forgetting * (1 - strength) * novelty;
+  const urgency =
+    Math.log1p(forgetting) * Math.log1p(1 - strength) * Math.log1p(novelty);
+  return urgency;
+};
+
+const calculateStrengthMultiplier = (practiceTimes: number) => {
+  return 1 - Math.exp(-(practiceTimes / 4));
 };
 
 export const skillStrength = (stats: WordSkillStats | undefined): number => {
@@ -30,7 +46,8 @@ export const skillStrength = (stats: WordSkillStats | undefined): number => {
 
   const strength = 1 - 0.666 * failureRate - 0.333 * partialSuccessRate;
 
-  return clamp(strength);
+  // a strength of 1 is impossible, it would mean an eternally remembered word
+  return clamp(strength, 0, 0.99);
 };
 
 const wordStrength = (word: WordWithStats, whitelist: Skill[]): number => {
@@ -45,12 +62,12 @@ const wordStrength = (word: WordWithStats, whitelist: Skill[]): number => {
 };
 
 const forgettingFactor = (
-  word: WordWithStats,
+  lastPracticedAt: Date | undefined,
   strength: number,
   now: Date
 ): number => {
-  if (!word.lastPracticedAt) return 1;
-  const days = daysSince(word.lastPracticedAt, now);
+  if (!lastPracticedAt) return 1;
+  const days = daysSince(lastPracticedAt, now);
 
   // strong words decay slower
   const stability = 2 + 10 * strength;
