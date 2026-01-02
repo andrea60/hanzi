@@ -14,7 +14,7 @@ export const useWordsAccuracyStats = (
     queryFn: async () => {
       const user = getAuthenticatedUser();
 
-      let baseQuery = db.wordStats
+      let baseQuery = db.wordSkillStatsV3
         .where("[userId+avgAccuracy]")
         .between([user.uid, Dexie.minKey], [user.uid, Dexie.maxKey])
         .limit(limit);

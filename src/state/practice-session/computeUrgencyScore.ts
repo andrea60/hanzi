@@ -1,14 +1,6 @@
 import { daysSince } from "../../utils/daysSince";
-import { random } from "../../utils/random";
-import { WordSkillStats, WordWithStats } from "./PracticeScheduler";
-import { Skill } from "./usePracticeSession";
+import { Skill, WordSkillStats, WordWithStats } from "./PracticeScheduler";
 
-const SKILL_WEIGHTS: Record<Skill, number> = {
-  read: 0.25,
-  "type-hanzi": 0.25,
-  "type-pinyi": 0.25,
-  write: 0.25,
-};
 // Maybe should this compute the `skillUrgencyScore`? And then I can have multiple times the same word in a session
 export const computeSkillUrgencyScore = (
   word: WordWithStats,
@@ -29,9 +21,12 @@ export const computeSkillUrgencyScore = (
   );
   const novelty = noveltyFactor(word, now);
 
-  const urgency =
-    Math.log1p(forgetting) * Math.log1p(1 - strength) * Math.log1p(novelty);
+  const urgency = forgetting * Math.log1p(1 - strength) * novelty;
   return urgency;
+};
+
+const sigmoid = (x: number, middlePoint: number) => {
+  return 1 / (1 + Math.exp(-(x - middlePoint)));
 };
 
 const calculateStrengthMultiplier = (practiceTimes: number) => {
@@ -50,33 +45,27 @@ export const skillStrength = (stats: WordSkillStats | undefined): number => {
   return clamp(strength, 0, 0.99);
 };
 
-const wordStrength = (word: WordWithStats, whitelist: Skill[]): number => {
-  let total = 0;
-
-  for (const skill of Object.keys(SKILL_WEIGHTS) as Skill[]) {
-    if (!whitelist.includes(skill)) continue;
-    total += SKILL_WEIGHTS[skill] * skillStrength(word.skillStats[skill]);
-  }
-
-  return clamp(total);
-};
-
 const forgettingFactor = (
   lastPracticedAt: Date | undefined,
   strength: number,
   now: Date
 ): number => {
   if (!lastPracticedAt) return 1;
+  // const days = daysSince(lastPracticedAt, now);
+  // return sigmoid(days, 3.5);
+
+  if (!lastPracticedAt) return 1;
   const days = daysSince(lastPracticedAt, now);
 
   // strong words decay slower
   const stability = 2 + 10 * strength;
 
-  return Math.exp(days / stability);
+  return sigmoid(Math.exp(days / stability), 4);
 };
 
 const noveltyFactor = (word: WordWithStats, now: Date): number => {
   const days = daysSince(word.addedAt, now);
+  // return Math.exp(-(days / 2));
   const maxNovelty = 5;
   if (days <= 0) return maxNovelty;
   return clamp(7 / days, 1, maxNovelty);

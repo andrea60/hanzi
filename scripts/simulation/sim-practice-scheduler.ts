@@ -2,11 +2,12 @@ import {
   WordStatRow,
   DictionaryRow,
 } from "../../src/state/database/database.db";
-import { PracticeScheduler } from "../../src/state/practice-session/PracticeScheduler";
 import {
+  PracticeScheduler,
   Skill,
   SkillPracticeResult,
-} from "../../src/state/practice-session/usePracticeSession";
+} from "../../src/state/practice-session/PracticeScheduler";
+
 import { FakeTime } from "./simulate";
 
 export class InMemoryPracticeScheduler extends PracticeScheduler {

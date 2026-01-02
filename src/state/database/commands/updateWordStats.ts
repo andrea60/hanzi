@@ -6,7 +6,7 @@ export const updateWordStats = async (
   wordStats: WordPracticeResult[],
   sessionTime: Date
 ) => {
-  const currentStats = await db.wordStats
+  const currentStats = await db.wordSkillStatsV3
     .where("userId")
     .equals(userId)
     .toArray();
@@ -14,25 +14,40 @@ export const updateWordStats = async (
   const newStats: WordStatRow[] = [];
   for (const sessionWordStats of wordStats) {
     const statRow = currentStats.find(
-      (stat) => stat.word === sessionWordStats.word
+      (stat) =>
+        stat.word === sessionWordStats.word &&
+        stat.skill === sessionWordStats.objective
     );
 
-    if (statRow)
-      newStats.push({
-        ...statRow,
-        practiceCount: statRow.practiceCount + 1,
-        lastPracticed: sessionTime,
-        avgAccuracy: sessionWordStats.newAvgAccuracy,
-      });
-    else
-      newStats.push({
-        word: sessionWordStats.word,
-        userId,
-        practiceCount: 1,
-        lastPracticed: sessionTime,
-        avgAccuracy: sessionWordStats.sessionAccuracy,
-      });
+    const newRow = statRow
+      ? { ...statRow }
+      : {
+          userId,
+          word: sessionWordStats.word,
+          skill: sessionWordStats.objective,
+          failures: 0,
+          partialSuccesses: 0,
+          successes: 0,
+          totalCount: 0,
+          lastPracticedAt: sessionTime,
+        };
+
+    newRow.totalCount++;
+    switch (sessionWordStats.result) {
+      case "failure":
+      case "skipped":
+        newRow.failures++;
+        break;
+      case "partial-success":
+        newRow.partialSuccesses++;
+        break;
+      case "success":
+        newRow.successes++;
+        break;
+    }
+
+    newStats.push(newRow);
   }
 
-  await db.wordStats.bulkPut(newStats);
+  await db.wordSkillStatsV3.bulkPut(newStats);
 };

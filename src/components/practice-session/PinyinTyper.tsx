@@ -1,3 +1,21 @@
+import { useRunningPracticeSession } from "../../state/practice-session/usePracticeSession";
+import { TypingExercise } from "./components/TypingExercise";
+
 export const PinyinTyper = () => {
-  return <p>Pinyin Typer</p>;
+  const { currentWord } = useRunningPracticeSession();
+
+  const validateInput = (input: string) => {
+    const expectedInput = currentWord.pinyin.replace(/\w/g, "").toLowerCase();
+    const sanitizedInput = input.replace(/\w/g, "").toLowerCase();
+
+    return expectedInput === sanitizedInput;
+  };
+
+  return (
+    <TypingExercise
+      label="Type the word using pinyin, including tones. For example: `nǐhǎo`"
+      placeholder="Type using pinyin here"
+      validateInput={validateInput}
+    />
+  );
 };

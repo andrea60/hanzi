@@ -1,6 +1,5 @@
 import Dexie from "dexie";
-import { Skill } from "../practice-session/usePracticeSession";
-import { WordSkillStats } from "../practice-session/PracticeScheduler";
+import { Skill } from "../practice-session/PracticeScheduler";
 
 export type DictionaryRow = {
   word: string;
@@ -47,14 +46,14 @@ export const db = new Dexie("hanzi") as Dexie & {
   dictionary: Dexie.Table<DictionaryRow>;
   versions: Dexie.Table<HanziVersionRow>;
   favourites: Dexie.Table<UserFavouriteRow>;
-  wordSkillStats: Dexie.Table<WordStatRow>;
+  wordSkillStatsV3: Dexie.Table<WordStatRow>;
   sessions: Dexie.Table<SessionRow>;
 };
-db.version(2).stores({
+db.version(3).stores({
   strokeData: "char",
   dictionary: "word, searchablePinyin",
   versions: "version, date",
   favourites: "[word+userId], userId, addedAt",
-  wordSkillStats: "[word+userId], [word+skill+userId], userId",
+  wordSkillStatsV3: "[word+skill+userId], [word+userId], userId",
   sessions: "[id+userId], userId",
 });

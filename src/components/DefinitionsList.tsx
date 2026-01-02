@@ -5,6 +5,7 @@ type Props = {
   className?: string;
 };
 export const DefinitionsList = ({ definitions, className }: Props) => {
+  return <p className={className}>{definitions.join(" - ")}</p>;
   return (
     <ul className={classNames("list-disc", className)}>
       {definitions.map((d, idx) => (

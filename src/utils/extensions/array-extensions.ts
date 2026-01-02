@@ -5,6 +5,7 @@ declare global {
     sortBy(selector: (item: T) => any, dir: "asc" | "desc"): T[];
     min(selector: (item: T) => number): number;
     max(selector: (item: T) => number): number;
+    /** Returnes a shuffled copy of the array */
     shuffle(): T[];
   }
 }

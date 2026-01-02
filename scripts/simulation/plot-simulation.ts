@@ -1,7 +1,7 @@
 import { Plot } from "nodeplotlib";
-import { Skill } from "../../src/state/practice-session/usePracticeSession";
 import * as plt from "nodeplotlib";
 import { Subject } from "rxjs";
+import { Skill } from "../../src/state/practice-session/PracticeScheduler";
 
 export class SimulationPlotter {
   private plotData: Record<string, Subject<Plot[]>> = {};

@@ -1,27 +1,27 @@
 import { useFavouritesCount } from "../../state/database/queries/useFavourites";
 import {
   BookOpenIcon,
-  InformationCircleIcon,
+  DocumentTextIcon,
+  PencilIcon,
 } from "@heroicons/react/24/outline";
 import { Link } from "@tanstack/react-router";
 import { FaceFrownIcon } from "@heroicons/react/24/outline";
-import {
-  PracticeMode,
-  usePracticeSession,
-} from "../../state/practice-session/usePracticeSession";
+import { usePracticeSession } from "../../state/practice-session/usePracticeSession";
 import { usePageTitle } from "../../utils/PageTitleProvider";
 import { MinusIcon, PlusIcon } from "@heroicons/react/24/solid";
 import { atomWithStorage } from "jotai/utils";
 import { useAtom } from "jotai";
 import { ErrorHandler } from "../ui/ErrorHandler";
-import { PracticeTemplates } from "./practice-templates";
-import {
-  MultiProgression,
-  MultiProgressionStage,
-} from "../ui/MultiProgression";
-import { BucketDef } from "../../state/practice-session/PracticeScheduler";
+import { MultiProgressionStage } from "../ui/MultiProgression";
 import { match } from "ts-pattern";
+import {
+  ALL_SKILLS,
+  Skill,
+} from "../../state/practice-session/PracticeScheduler";
 import { useState } from "react";
+import { motion } from "motion/react";
+import classNames from "classnames";
+import { KeyboardIcon } from "@phosphor-icons/react";
 
 export const PracticeSessionConfiguration = () => {
   usePageTitle("Practice Session", []);
@@ -32,13 +32,9 @@ export const PracticeSessionConfiguration = () => {
   if (favouritesCount === undefined) return <p>Loading...</p>;
   if (isRunning) return <RunningSessionPlaceholder />;
 
-  const handleOnStart = (
-    numWords: number,
-    buckets: BucketDef[],
-    mode: PracticeMode
-  ) => {
+  const handleOnStart = (numWords: number, skills: Skill[]) => {
     if (isRunning) return;
-    startSession(numWords, buckets, mode);
+    startSession(numWords, skills);
   };
   return (
     <div className="flex flex-col h-full">
@@ -66,24 +62,18 @@ export const PracticeSessionConfiguration = () => {
 };
 
 const numWordsAtom = atomWithStorage<number>("session-setup-numwords", 1);
-const practiceTemplateAtom = atomWithStorage<string>(
-  "session-setup-template",
-  "default"
+const skillsAtom = atomWithStorage<Skill[]>(
+  "session-target-skills",
+  ALL_SKILLS
 );
+
 type Props = {
   totalWordsCount: number;
-  onStart: (
-    numWords: number,
-    bucketDefs: BucketDef[],
-    mode: PracticeMode
-  ) => void;
+  onStart: (numWords: number, skills: Skill[]) => void;
 };
 const SessionConfigurator = ({ totalWordsCount, onStart }: Props) => {
   const [numWords, setNumWords] = useAtom(numWordsAtom);
-  const [mode, setMode] = useState<PracticeMode>("memo");
-  const [selectedTemplateName, setSelectedTemplateName] =
-    useAtom(practiceTemplateAtom);
-  const selectedTemplated = PracticeTemplates[selectedTemplateName];
+  const [skills, setSkills] = useAtom(skillsAtom);
 
   const addWordCount = (val: number) => {
     setNumWords((c) =>
@@ -91,30 +81,30 @@ const SessionConfigurator = ({ totalWordsCount, onStart }: Props) => {
     );
   };
 
+  const toggleSkill = (skill: Skill) => {
+    setSkills((cur) => {
+      const existing = cur.includes(skill);
+      if (existing) return cur.filter((f) => f !== skill);
+      return [...cur, skill];
+    });
+  };
+
+  const valid = skills.length > 0;
+
   return (
     <>
       <div className="flex flex-col gap-4 h-full">
         <div>
-          <label className="mb-2">What do you want to practice?</label>
-          <div className="tabs tabs-box bg-base-300 justify-center">
-            <input
-              type="radio"
-              name="practiceMode"
-              className="tab flex-1"
-              aria-label="Characters Memorization"
-              value="memo"
-              checked={mode === "memo"}
-              onChange={(e) => setMode(e.currentTarget.value as PracticeMode)}
-            />
-            <input
-              type="radio"
-              name="practiceMode"
-              className="tab flex-1"
-              aria-label="Hand Writing"
-              value="write"
-              checked={mode === "write"}
-              onChange={(e) => setMode(e.currentTarget.value as PracticeMode)}
-            />
+          <label>What do you want to practice?</label>
+          <div className="grid grid-cols-2 gap-2 mt-2">
+            {ALL_SKILLS.map((s) => (
+              <SkillBox
+                key={s}
+                skill={s}
+                selected={skills.includes(s)}
+                onClick={() => toggleSkill(s)}
+              />
+            ))}
           </div>
         </div>
         <div>
@@ -137,32 +127,11 @@ const SessionConfigurator = ({ totalWordsCount, onStart }: Props) => {
             </button>
           </div>
         </div>
-        <div>
-          <label>What do you want to focus on?</label>
-          <select
-            className="select block w-full my-2 select-lg"
-            value={selectedTemplateName}
-            onChange={(e) => setSelectedTemplateName(e.target.value)}
-          >
-            {Object.entries(PracticeTemplates).map(([key, template]) => (
-              <option key={key} value={key}>
-                {template.name}
-              </option>
-            ))}
-          </select>
-          <MultiProgression
-            className="my-4"
-            stages={selectedTemplated.buckets.map(bucketToStep)}
-          />
-          <p className="text-xs">
-            <InformationCircleIcon className="size-4 mr-2 inline" />
-            {selectedTemplated.description}
-          </p>
-        </div>
 
         <button
           className="btn btn-primary w-full mt-auto mb-2 self-end"
-          onClick={() => onStart(numWords, selectedTemplated.buckets, mode)}
+          disabled={!valid}
+          onClick={() => onStart(numWords, ALL_SKILLS)}
         >
           <BookOpenIcon className="size-6" /> Let's Start!
         </button>
@@ -171,29 +140,35 @@ const SessionConfigurator = ({ totalWordsCount, onStart }: Props) => {
   );
 };
 
-const bucketToStep = (bucket: BucketDef): MultiProgressionStage => {
-  return match(bucket.bucketType)
-    .with("newest", () => ({
-      value: bucket.weight,
-      label: "Newest",
+type SkillBoxProps = {
+  skill: Skill;
+  selected: boolean;
+  onClick: () => void;
+};
+const SkillBox = ({ skill, onClick, selected }: SkillBoxProps) => {
+  const { icon: Icon, label } = match(skill)
+    .with("read", () => ({ label: "Read 汉字", icon: DocumentTextIcon }))
+    .with("type-hanzi", () => ({ label: "Type 汉字", icon: KeyboardIcon }))
+    .with("type-pinyi", () => ({
+      label: "Type Pinyin",
+      icon: KeyboardIcon,
     }))
-    .with("worstAccuracy", () => ({
-      value: bucket.weight,
-      label: "Worst",
-    }))
-    .with("leastPracticed", () => ({
-      value: bucket.weight,
-      label: "Uncommon",
-    }))
-    .with("random", () => ({
-      value: bucket.weight,
-      label: "Random",
-    }))
-    .with("lastPracticed", () => ({
-      value: bucket.weight,
-      label: "Rusty",
-    }))
+    .with("write", () => ({ label: "Hand Write", icon: PencilIcon }))
     .exhaustive();
+  return (
+    <motion.div
+      className={classNames("card card-default card-sm border", {
+        "opacity-50 shadow-none!": !selected,
+      })}
+      whileTap={{ scale: 0.9 }}
+      onClick={onClick}
+    >
+      <div className="card-body flex flex-row items-center justify-center">
+        <Icon className="size-6" />
+        <label>{label}</label>
+      </div>
+    </motion.div>
+  );
 };
 
 export const RunningSessionPlaceholder = () => {

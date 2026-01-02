@@ -25,7 +25,7 @@ export const HanziReader = () => {
             <label className="font-bold mb-4">{currentWord.pinyin}</label>
             <DefinitionsList
               definitions={currentWord.definitions}
-              className="text-left mt-4"
+              className="text-center mt-4"
             />
           </div>
         )}
@@ -33,18 +33,18 @@ export const HanziReader = () => {
 
       {isRevealed ? (
         <div className="flex gap-2 w-full">
-          <button className="btn btn-neutral grow">
-            <HandThumbDownIcon
-              className="size-4"
-              onClick={() => markWordComplete(0)}
-            />
+          <button
+            className="btn btn-neutral grow"
+            onClick={() => markWordComplete("failure")}
+          >
+            <HandThumbDownIcon className="size-4" />
             Forgot
           </button>
-          <button className="btn btn-success grow">
-            <HandThumbUpIcon
-              className="size-4"
-              onClick={() => markWordComplete(1)}
-            />
+          <button
+            className="btn btn-success grow"
+            onClick={() => markWordComplete("success")}
+          >
+            <HandThumbUpIcon className="size-4" />
             Nailed it
           </button>
         </div>

@@ -4,8 +4,7 @@ import { SimulationPlotter } from "./plot-simulation.ts";
 import { InMemoryPracticeScheduler } from "./sim-practice-scheduler.ts";
 import { SimulatedUser } from "./sim-user.ts";
 import { daysSince } from "../../src/utils/daysSince.ts";
-import { ALL_SKILLS } from "../../src/state/practice-session/usePracticeSession.ts";
-import { toMap } from "../../src/utils/toMap.ts";
+import { ALL_SKILLS } from "../../src/state/practice-session/PracticeScheduler.ts";
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -49,12 +48,13 @@ const scheduler = new InMemoryPracticeScheduler(
   "test-user",
   INITIAL_WORDS
 );
-const user = new SimulatedUser(time, new Map([["type-hanzi", 1]]));
+const user = new SimulatedUser(time);
 const plotter = new SimulationPlotter();
 
 do {
   for (let i = 0; i < SPEED; i++) {
     time.advanceDays(1);
+    user.nextDay();
 
     for (let y = 0; y < SESSIONS_PER_DAY; y++) {
       const result = await scheduler.nextWords(SESSION_SIZE);
@@ -94,12 +94,21 @@ do {
     user.memory.map((item) => item.practiceCount)
   );
   plotter.plotGropedData(
+    "User Practice Counts Over Time (last 30 days!!!)",
+    user.shortTermPracticeData
+  );
+  plotter.plotGropedData(
     "Days since last practice",
     user.memory.map((item) => daysSince(time.now(), item.lastPracticed))
   );
 
+  // plotter.plotGropedData(
+  //   "WordSkill Urgency",
+  //   toMap(wordStats, (w) => `${w.word}:${w.objective}`).map((v) => v.urgency)
+  // );
+
   plotter.plotGropedData(
-    "WordSkill Urgency",
-    toMap(wordStats, (w) => `${w.word}:${w.objective}`).map((v) => v.urgency)
+    "Success Rate per word",
+    user.memory.map((item) => item.successes / item.practiceCount)
   );
 } while (true);

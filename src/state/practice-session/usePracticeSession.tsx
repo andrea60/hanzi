@@ -1,48 +1,25 @@
 import { useAtom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
-
 import { updateWordStats } from "../database/commands/updateWordStats";
 import { getAuthenticatedUser } from "../../auth/useAuth";
-import { useMemo } from "react";
 import { saveSessionStats } from "../database/commands/saveSessionStats";
 import { showToast } from "../../components/toastr/useToast";
 import { useQueryClient } from "@tanstack/react-query";
 import { QueryKey } from "../database/queries/queryKey";
-import { db } from "../database/database.db";
-import { toGroup } from "../../utils/toGroup";
-import { toRecord } from "../../utils/toRecord";
-import { DefaultPracticeScheduler } from "./PracticeScheduler";
+import {
+  DefaultPracticeScheduler,
+  Skill,
+  SkillPracticeResult,
+  WordPracticeData,
+} from "./PracticeScheduler";
 
 export type PracticeMode = "write" | "memo";
-
-export type SkillPracticeResult =
-  | "success"
-  | "partial-success"
-  | "failure"
-  | "skipped";
 
 export type WordPracticeResult = {
   word: string;
   pinyin: string;
   objective: Skill;
   result: SkillPracticeResult;
-};
-
-export type Skill = "read" | "write" | "type-pinyi" | "type-hanzi";
-export const ALL_SKILLS: Skill[] = [
-  "read",
-  "write",
-  "type-pinyi",
-  "type-hanzi",
-];
-
-export type WordPracticeData = {
-  uuid: string;
-  word: string;
-  pinyin: string;
-  definitions: string[];
-  objective: Skill;
-  urgency: number;
 };
 
 type InProgressSessionState = {
@@ -88,12 +65,14 @@ export const usePracticeSession = () => {
     const scheduler = new DefaultPracticeScheduler(user.uid);
     const words = await scheduler.nextWords(numWords, skills);
 
+    const shuffledWords = words.shuffle();
+
     setSession({
       state: "InProgress",
       id: crypto.randomUUID(),
       totalWords: words.length,
       completed: {},
-      queue: words,
+      queue: shuffledWords,
       startTime: new Date().toISOString(),
     });
   };
@@ -172,8 +151,7 @@ export const usePracticeSession = () => {
         startTime,
         session.timeTakenSeconds,
         session.stats.map((s) => s.word),
-        user.uid,
-        session.stats
+        user.uid
       );
     } catch (error) {
       if (error instanceof Error)
@@ -230,6 +208,20 @@ export const usePracticeSession = () => {
     stats: session.stats,
     timeTakenSeconds: session.timeTakenSeconds,
   } as const;
+};
+
+/** Syntax sugar around the existing hook `usePracticeSession` which assumes a session is running.
+ *
+ * This throws an exception if it's not
+ */
+export const useRunningPracticeSession = () => {
+  const session = usePracticeSession();
+  if (!session.isRunning || session.isCompleted)
+    throw new Error(
+      "No active session running. This component should not be rendered"
+    );
+
+  return session;
 };
 
 const getProgress = (state: InProgressSessionState): number => {

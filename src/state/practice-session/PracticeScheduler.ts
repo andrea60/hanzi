@@ -1,26 +1,29 @@
-import { match } from "ts-pattern";
 import { toMap } from "../../utils/toMap";
 import { db, DictionaryRow, WordStatRow } from "../database/database.db";
-import {
-  ALL_SKILLS,
-  PracticeMode,
-  Skill,
-  WordPracticeData,
-} from "./usePracticeSession";
-import { computeSkillUrgencyScore, skillStrength } from "./computeUrgencyScore";
+import { computeSkillUrgencyScore } from "./computeUrgencyScore";
 import { toGroup } from "../../utils/toGroup";
 import { toRecord } from "../../utils/toRecord";
 
-export type BucketType =
-  | "worstAccuracy"
-  | "leastPracticed"
-  | "lastPracticed"
-  | "newest"
-  | "random";
+export type SkillPracticeResult =
+  | "success"
+  | "partial-success"
+  | "failure"
+  | "skipped";
+export type Skill = "read" | "write" | "type-pinyi" | "type-hanzi";
+export const ALL_SKILLS: Skill[] = [
+  "read",
+  "write",
+  "type-pinyi",
+  "type-hanzi",
+];
 
-export type BucketDef = {
-  weight: number;
-  bucketType: BucketType;
+export type WordPracticeData = {
+  uuid: string;
+  word: string;
+  pinyin: string;
+  definitions: string[];
+  objective: Skill;
+  urgency: number;
 };
 
 export type WordWithStats = {
@@ -67,7 +70,7 @@ export abstract class PracticeScheduler {
         lastPracticedAt,
       };
 
-      return ALL_SKILLS.map((skill) => ({
+      return skills.map((skill) => ({
         ...word,
         skill,
         urgency: computeSkillUrgencyScore(word, skill, this.getNow()),
@@ -123,34 +126,6 @@ export abstract class PracticeScheduler {
   protected abstract getDefinitions(words: string[]): Promise<DictionaryRow[]>;
 
   protected abstract getWordStats(words: string[]): Promise<WordStatRow[]>;
-
-  private selectSkillToPractice(word: WordWithStats): Skill {
-    const unpracticedSkills = this.findUnpracticedSkill(word.skillStats);
-
-    // If there are unpracticed skills, prioritize them over anything else
-    if (unpracticedSkills) return unpracticedSkills;
-
-    const skillStrengths = (Object.keys(word.skillStats) as Skill[]).map(
-      (skill) => ({
-        skill,
-        strength: skillStrength(word.skillStats[skill]),
-        last: word.skillStats[skill].lastPracticedAt,
-      })
-    );
-    return skillStrengths.sort((a, b) =>
-      a.strength !== b.strength
-        ? a.strength - b.strength
-        : a.last.valueOf() - b.last.valueOf()
-    )[0].skill;
-  }
-  private findUnpracticedSkill(skillStats: Record<Skill, WordSkillStats>) {
-    for (const skill of ALL_SKILLS) {
-      if (!skillStats[skill] || skillStats[skill].totalCount === 0) {
-        return skill;
-      }
-    }
-    return undefined;
-  }
 }
 
 export class DefaultPracticeScheduler extends PracticeScheduler {
@@ -161,7 +136,7 @@ export class DefaultPracticeScheduler extends PracticeScheduler {
     return db.favourites.where("userId").equals(this.userId).toArray();
   }
   protected getWordStats(words: string[]): Promise<WordStatRow[]> {
-    return db.wordSkillStats
+    return db.wordSkillStatsV3
       .where("[word+userId]")
       .anyOf(words.map((w) => [w, this.userId]))
       .toArray();

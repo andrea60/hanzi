@@ -4,7 +4,7 @@ import {
   usePracticeSession,
 } from "../../state/practice-session/usePracticeSession";
 import { useConfirm } from "../modal/useConfirm";
-import { WordPractice } from "./WordPractice";
+import { HanziWriter } from "./HanziWriter";
 import { EndSessionReport } from "./report/EndSessionReport";
 import { ErrorBoundary, ErrorHandlerComponent } from "../ErrorBoundary";
 import { match } from "ts-pattern";
@@ -28,7 +28,7 @@ export const PracticeSession = () => {
 
   const Content = match(session.currentWord)
     .with(undefined, () => () => undefined)
-    .with({ objective: "write" }, () => WordPractice)
+    .with({ objective: "write" }, () => HanziWriter)
     .with({ objective: "read" }, () => HanziReader)
     .with({ objective: "type-hanzi" }, () => HanziTyper)
     .with({ objective: "type-pinyi" }, () => PinyinTyper)
@@ -37,18 +37,20 @@ export const PracticeSession = () => {
   return (
     <div className="rounded-lg p-6 h-full max-h-full w-full bg-base-200 flex flex-col overflow-y-hidden">
       <ErrorBoundary handler={ErrorHandler}>
-        {!session.isCompleted && (
-          <XMarkIcon
-            role="button"
-            className="size-4 mb-2"
-            onClick={handleExitClick}
+        <div className="flex items-center gap-3">
+          {!session.isCompleted && (
+            <XMarkIcon
+              role="button"
+              className="size-6 mb-2"
+              onClick={handleExitClick}
+            />
+          )}
+          <progress
+            className="progress w-full mb-2"
+            value={session.progress}
+            max="1"
           />
-        )}
-        <progress
-          className="progress w-full mb-2"
-          value={session.progress}
-          max="1"
-        />
+        </div>
         {session.isCompleted ? (
           <EndSessionReport />
         ) : (

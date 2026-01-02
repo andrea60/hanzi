@@ -4,11 +4,11 @@ import { useResettableState } from "../../utils/useResettableState";
 import { ArrowPathIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 import { CheckCircleIcon as CheckCircleIconSolid } from "@heroicons/react/24/solid";
 import { motion } from "motion/react";
-import { AccuracyBadge } from "../ui/AccuracyBadge";
-import { BucketType } from "../../state/practice-session/PracticeScheduler";
 import { match } from "ts-pattern";
+import { useState } from "react";
+import { SkillPracticeResult } from "../../state/practice-session/PracticeScheduler";
 
-export const WordPractice = () => {
+export const HanziWriter = () => {
   const {
     currentWord,
     markWordComplete,
@@ -25,28 +25,28 @@ export const WordPractice = () => {
   const [wordCompleted, setWordCompleted] = useResettableState(false, [
     currentWord,
   ]);
-  const [accuracy, setAccuracy] = useResettableState<number | undefined>(
-    undefined,
-    [currentWord]
-  );
-  const handleComplete = (accuracy: number) => {
+  const [result, setResult] = useState<SkillPracticeResult>();
+
+  const handleComplete = (failed: boolean, usedHints: boolean) => {
     setWordCompleted(true);
-    setAccuracy(accuracy);
+    if (failed) setResult("failure");
+    else if (usedHints) setResult("partial-success");
+    else setResult("success");
   };
 
   const moveToNext = () => {
-    if (!accuracy)
+    if (!result)
       throw new Error(
-        "No accuracy data for the current word. This should not happen"
+        "No result registered for current word. This should not happen"
       );
-    markWordComplete(accuracy);
+    markWordComplete(result);
   };
   const practiceAgain = () => {
-    if (!accuracy)
+    if (!result)
       throw new Error(
-        "No accuracy data for the current word. This should not happen"
+        "No result registered for current word. This should not happen"
       );
-    repracticeWord(accuracy);
+    repracticeWord(result);
   };
 
   return (
@@ -69,9 +69,6 @@ export const WordPractice = () => {
               </motion.span>
             )}
           </h1>
-          <span className="badge badge-sm badge-primary mr-2">
-            {bucketTypeToLabel(currentWord.bucketSource)}
-          </span>
         </div>
 
         <p className="text-xs h-6 whitespace-nowrap overflow-hidden text-ellipsis">
@@ -83,18 +80,9 @@ export const WordPractice = () => {
           key={currentWord.uuid}
           word={currentWord.word}
           onComplete={handleComplete}
-          onAccuracyChange={setAccuracy}
         />
       </div>
 
-      <div className="flex justify-between mb-2 items-center text-sm gap-2">
-        <span>
-          Avg Accuracy: <AccuracyBadge accuracy={currentWord.avgAccuracy} />
-        </span>
-        <span>
-          Accuracy: <AccuracyBadge accuracy={accuracy} />
-        </span>
-      </div>
       <div className="flex gap-2 text-sm">
         <button
           className="btn btn-warning btn-dash flex-1"
@@ -114,12 +102,3 @@ export const WordPractice = () => {
     </div>
   );
 };
-
-const bucketTypeToLabel = (type: BucketType) =>
-  match(type)
-    .with("lastPracticed", () => "Rusty Word")
-    .with("leastPracticed", () => "Uncommon Word")
-    .with("newest", () => "New Word")
-    .with("worstAccuracy", () => "Weak Word")
-    .with("random", () => "Random")
-    .exhaustive();

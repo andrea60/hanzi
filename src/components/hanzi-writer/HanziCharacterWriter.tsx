@@ -15,13 +15,13 @@ export type HanziWriterReport = {
 type Props = {
   char: string;
   maxHints: number;
+  maxFails: number;
   size: number;
-  onComplete: (accuracy: number) => void;
-  onAccuracyChange?: (accuracy: number) => void;
+  onComplete: (failed: boolean, usedHints: boolean) => void;
 };
 export const HanziCharacterWriter = (props: Props) => {
   const { char, size } = props;
-  const [currentStroke, setCurrentStroke] = useResettableState(() => 0, [char]);
+  const [_, setCurrentStroke] = useResettableState(() => 0, [char]);
   const [hints, setHints] = useState(0);
   const [mistakes, setMistakes] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
@@ -30,25 +30,14 @@ export const HanziCharacterWriter = (props: Props) => {
   const strokesNumber = useRef<number>(null);
 
   useEffect(() => {
-    if (!strokesNumber.current) return;
-    props.onAccuracyChange?.(
-      getAccuracy({
-        hints,
-        mistakes,
-        strokes: strokesNumber.current!,
-      })
-    );
-  }, [currentStroke, hints, mistakes]);
-
+    if (isCompleted) return;
+    if (mistakes > props.maxFails) {
+      props.onComplete(true, hints > 0);
+    }
+  }, [mistakes]);
   useEffect(() => {
     if (!isCompleted) return;
-    props.onComplete(
-      getAccuracy({
-        hints,
-        mistakes,
-        strokes: strokesNumber.current!,
-      })
-    );
+    props.onComplete(mistakes > props.maxFails, hints > 0);
   }, [isCompleted]);
 
   useAsyncEffect(async () => {
@@ -101,13 +90,6 @@ export const HanziCharacterWriter = (props: Props) => {
     writerInstance.current?.showOutline();
     setTimeout(() => writerInstance.current?.hideOutline(), 500);
     setHints((x) => x + 1);
-    props.onAccuracyChange?.(
-      getAccuracy({
-        hints: hints + 1,
-        mistakes: mistakes,
-        strokes: strokesNumber.current!,
-      })
-    );
   };
 
   const reset = () => {

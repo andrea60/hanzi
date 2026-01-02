@@ -8,23 +8,13 @@ import {
 } from "react";
 import classNames from "classnames";
 import debounce from "lodash.debounce";
-import {
-  HanziWriterReport,
-  HanziCharacterWriter,
-} from "../hanzi-writer/HanziCharacterWriter";
-import { useResettableState } from "../../utils/useResettableState";
-import { getAccuracy } from "./get-accuracy";
+import { HanziCharacterWriter } from "../hanzi-writer/HanziCharacterWriter";
 
 type Props = {
   word: string;
-  onComplete: (accuracy: number) => void;
-  onAccuracyChange?: (accuracy: number) => void;
+  onComplete: (failed: boolean, usedHints: boolean) => void;
 };
-export const HanziWordWriter = ({
-  word,
-  onComplete,
-  onAccuracyChange,
-}: Props) => {
+export const HanziWordWriter = ({ word, onComplete }: Props) => {
   const stepContainer = useRef<HTMLDivElement>(null);
   const chars = useMemo(() => word.split(""), [word]);
   const [containerSize, setContainerSize] = useState<number>();
@@ -32,36 +22,23 @@ export const HanziWordWriter = ({
   const [stepStates, setStepStates] = useState<boolean[]>(
     chars.map(() => false)
   );
-  const [charsAccuracies, setCharsAccuracies] = useResettableState<
-    Record<number, number>
-  >({}, [chars]);
+  const [usedHints, setUsedHints] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   useLayoutEffect(() => {
     if (!stepContainer.current) return;
     setContainerSize(stepContainer.current?.clientWidth);
   }, []);
 
-  const handleAccuracyChange = (step: number, accuracy: number) => {
-    setCharsAccuracies((c) => {
-      const newVal = { ...c };
-      newVal[step] = accuracy;
-      return newVal;
-    });
-  };
-
   const handleStepComplete = useCallback(
-    debounce((step: number, avgAccuracy: number) => {
-      setCharsAccuracies((c) => {
-        const newAcc = { ...c };
-        newAcc[step] = avgAccuracy;
-        return newAcc;
-      });
-
+    debounce((step: number, failed: boolean, usedHints: boolean) => {
       setStepStates((steps) => {
         const newSteps = [...steps];
         newSteps[step] = true;
         return newSteps;
       });
+      if (failed) setFailed(true);
+      if (usedHints) setUsedHints(true);
 
       // Move to next step, if any
       if (step < chars.length - 1) setStepIdx((s) => s + 1);
@@ -73,16 +50,9 @@ export const HanziWordWriter = ({
     // propagate step completion to parent
     const isCompleted = !stepStates.some((s) => s === false);
     if (isCompleted) {
-      onComplete(Object.values(charsAccuracies).average()!);
+      onComplete(failed, usedHints);
     }
   }, [stepStates]);
-
-  useEffect(() => {
-    // Propage accuracy changes to parent
-    const accuracy = Object.values(charsAccuracies).average();
-    if (!accuracy) return;
-    onAccuracyChange?.(accuracy);
-  }, [charsAccuracies]);
 
   return (
     <>
@@ -110,8 +80,10 @@ export const HanziWordWriter = ({
               <HanziCharacterWriter
                 char={char}
                 maxHints={2}
-                onComplete={(report) => handleStepComplete(idx, report)}
-                onAccuracyChange={(acc) => handleAccuracyChange(idx, acc)}
+                maxFails={5}
+                onComplete={(failed, useHints) =>
+                  handleStepComplete(idx, failed, useHints)
+                }
                 size={containerSize}
               />
             </div>
