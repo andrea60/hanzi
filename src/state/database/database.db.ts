@@ -41,6 +41,8 @@ export type SessionRow = {
   words: string[];
   timeTakenSeconds: number;
 };
+
+export type UserPreferenceRow = {};
 export const db = new Dexie("hanzi") as Dexie & {
   strokeData: Dexie.Table<StrokeDataRow>;
   dictionary: Dexie.Table<DictionaryRow>;

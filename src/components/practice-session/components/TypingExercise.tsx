@@ -1,32 +1,31 @@
 import classNames from "classnames";
 import { useAnimation, motion } from "motion/react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   useRunningPracticeSession,
   WordPracticeResult,
 } from "../../../state/practice-session/usePracticeSession";
 import { useTimedState } from "../../../utils/useTimedState";
 import { SkillPracticeResult } from "../../../state/practice-session/PracticeScheduler";
-import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { SuccessIcon } from "./SuccessIcon";
-import { match } from "ts-pattern";
+import { match, P } from "ts-pattern";
 import { FailureIcon } from "./FailureIcon";
-import {
-  ArrowCircleRightIcon,
-  CaretRight,
-  CaretRightIcon,
-} from "@phosphor-icons/react";
+import { CheckCircleIcon, XCircleIcon } from "@phosphor-icons/react";
+import { FlashCard } from "./FlashCard";
+import { LivesBadge } from "./LivesBadge";
 const MAX_ATTEMPTS = 5;
 
 type Props = {
   label: string;
-  placeholder: string;
+  helper: string;
   validateInput: (input: string) => boolean;
+  solution: string;
 };
 export const TypingExercise = ({
   label,
   validateInput,
-  placeholder,
+  helper,
+  solution,
 }: Props) => {
   const { currentWord, markWordComplete } = useRunningPracticeSession();
 
@@ -35,13 +34,16 @@ export const TypingExercise = ({
   const inputControls = useAnimation();
   const [inputError, setInputError] = useTimedState(1500);
   const [result, setResult] = useState<SkillPracticeResult>();
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const onFailure = () => {
     inputControls.start("shake");
     setInputError();
-    setAttempt((x) => x - 1);
+    setAttempt((x) => Math.max(0, x - 1));
     if (attempt > 1) {
+      // user has another life
       setValue("");
+      inputRef.current?.focus();
     } else {
       // run out of possible attempts
       setResult("failure");
@@ -66,6 +68,11 @@ export const TypingExercise = ({
     markWordComplete?.("skipped");
   };
 
+  const next = () => {
+    if (!result) return;
+    markWordComplete(result);
+  };
+
   const hasValue = value && value.trim().length > 0;
   const completed = !!result;
 
@@ -74,71 +81,80 @@ export const TypingExercise = ({
     .with("failure", () => FailureIcon)
     .otherwise(() => () => null);
 
+  const explanation = match(result)
+    .with("failure", () => (
+      <legend className="fieldset-legend text-left font-normal text-error">
+        <XCircleIcon weight="fill" size={16} />
+        The correct answer was:
+      </legend>
+    ))
+    .with("success", "partial-success", () => (
+      <legend className="fieldset-legend text-left font-normal text-success">
+        <CheckCircleIcon weight="fill" size={16} />
+        Well done!
+      </legend>
+    ))
+    .otherwise(() => null);
+
   return (
     <div className="h-full flex flex-col items-center justify-center gap-4">
-      <div className="text-center w-full">
-        <h1 className="text-2xl font-bold mb-2">
-          Writing Practice
-          {completed && <ResultIcon />}
-        </h1>
-
-        {/* <p className="text-xs">Type the translation of the word below</p> */}
-      </div>
-      <div className="grow flex flex-col justify-center w-full gap-8 text-center">
-        <div className="p-2 w-full text-center">
-          <label className="text-xs font-bold mb-2">Definition:</label>
-          <p>{currentWord.definitions.join(" - ")}</p>
-        </div>
-        <fieldset className="fieldset w-full ">
-          <legend className="fieldset-legend text-center">
-            How does it translate in Chinese?
-          </legend>
-          <motion.input
-            variants={variants}
-            animate={inputControls}
-            type="text"
-            autoFocus
-            className={classNames("input text-center w-full", {
-              "input-error": inputError,
-            })}
-            placeholder={placeholder}
-            value={value}
-            onChange={(e) => setValue(e.currentTarget.value)}
-            disabled={completed}
-          />
-          <label className="text-center w-full">{label}</label>
-        </fieldset>
-      </div>
-      <div className="text-right w-full">
-        <span className="text-sm text-right badge badge-error">
-          Attempts: {attempt}/{MAX_ATTEMPTS}
-        </span>
-      </div>
-      <div className="flex gap-2 w-full">
-        {completed ? (
-          <>
-            <button
-              className="btn btn-primary grow"
-              disabled={!hasValue}
-              onClick={handleSubmit}
-            >
-              Next <CaretRightIcon size={18} />
-            </button>
-          </>
-        ) : (
-          <>
-            <button className="btn btn-warning" onClick={handleSkip}>
-              Skip
-            </button>
-            <button
-              className="btn btn-primary grow"
-              disabled={!hasValue}
-              onClick={handleSubmit}
-            >
-              Check
-            </button>
-          </>
-        )}
+      <div className="grow w-full flex items-center">
+        <FlashCard
+          attempt={attempt}
+          maxAttempts={MAX_ATTEMPTS}
+          onSkip={handleSkip}
+          title={label}
+        >
+          <div className="flex items-center justify-between">
+            <h1 className="text-lg font-bold">What's the word for:</h1>
+            {completed && <ResultIcon />}
+          </div>
+          <p className="my-2 italic">{currentWord.definitions.join(" - ")}</p>
+          <div className="h-[80px] flex flex-row gap-2 items-end">
+            {completed ? (
+              <>
+                <fieldset className="fieldset grow">
+                  {explanation}
+                  <div className="h-[40px] rounded-sm bg-base-200 justify-center flex items-center text-xl border border-base-300">
+                    {solution}
+                  </div>
+                </fieldset>
+                <button className="btn btn-primary mb-1" onClick={next}>
+                  Next
+                </button>
+              </>
+            ) : (
+              <>
+                <fieldset className="fieldset grow">
+                  <legend className="fieldset-legend text-left font-normal">
+                    {helper}
+                  </legend>
+                  <motion.input
+                    ref={inputRef}
+                    variants={variants}
+                    animate={inputControls}
+                    type="text"
+                    autoFocus
+                    className={classNames("input text-center w-full", {
+                      "input-error": inputError,
+                    })}
+                    placeholder={helper}
+                    value={!completed ? value : solution}
+                    onChange={(e) => setValue(e.currentTarget.value)}
+                    disabled={completed}
+                  />
+                </fieldset>
+                <button
+                  className="btn btn-primary mb-1"
+                  disabled={!hasValue}
+                  onClick={handleSubmit}
+                >
+                  Check
+                </button>
+              </>
+            )}
+          </div>
+        </FlashCard>
       </div>
     </div>
   );

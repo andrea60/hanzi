@@ -13,8 +13,9 @@ export const PinyinTyper = () => {
 
   return (
     <TypingExercise
-      label="Type the word using pinyin, including tones. For example: `nǐhǎo`"
-      placeholder="Type using pinyin here"
+      label="Pinyin Typing Practice"
+      solution={currentWord.pinyin}
+      helper="Type pinyin"
       validateInput={validateInput}
     />
   );

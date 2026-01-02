@@ -10,8 +10,9 @@ export const HanziTyper = () => {
 
   return (
     <TypingExercise
-      label="Use chinese characters only, e.g. 你好"
-      placeholder="Type using 汉字 here"
+      label="汉字 Typing Practice"
+      solution={currentWord.word}
+      helper="Type 汉字"
       validateInput={validateInput}
     />
   );

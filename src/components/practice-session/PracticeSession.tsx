@@ -47,7 +47,7 @@ export const PracticeSession = () => {
           )}
           <progress
             className="progress w-full mb-2"
-            value={session.progress}
+            value={session.progress ?? 1}
             max="1"
           />
         </div>

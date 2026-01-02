@@ -131,7 +131,7 @@ const SessionConfigurator = ({ totalWordsCount, onStart }: Props) => {
         <button
           className="btn btn-primary w-full mt-auto mb-2 self-end"
           disabled={!valid}
-          onClick={() => onStart(numWords, ALL_SKILLS)}
+          onClick={() => onStart(numWords, skills)}
         >
           <BookOpenIcon className="size-6" /> Let's Start!
         </button>
