@@ -20,6 +20,7 @@ import {
   ErrorBoundary,
   ErrorHandlerComponentProps,
 } from "../../components/ErrorBoundary";
+import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 
 export const Route = createFileRoute("/app")({
   component: RouteComponent,
@@ -74,6 +75,11 @@ function RouteComponent() {
                 to: "/app/characters",
                 icon: MagnifyingGlassIcon,
                 label: "Search",
+              },
+              {
+                to: "/app/preferences",
+                icon: Cog6ToothIcon,
+                label: "Preferences",
               },
             ]}
           />

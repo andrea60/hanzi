@@ -16,6 +16,7 @@ import { Route as IndexImport } from './routes/index'
 import { Route as CharactersIndexImport } from './routes/characters/index'
 import { Route as AppPracticeSetupImport } from './routes/app/practice-setup'
 import { Route as AppCharactersImport } from './routes/app/characters'
+import { Route as AppPreferencesIndexImport } from './routes/app/preferences/index'
 import { Route as AppDashboardIndexImport } from './routes/app/dashboard/index'
 import { Route as AppCharactersCharImport } from './routes/app/characters/$char'
 
@@ -48,6 +49,12 @@ const AppPracticeSetupRoute = AppPracticeSetupImport.update({
 const AppCharactersRoute = AppCharactersImport.update({
   id: '/characters',
   path: '/characters',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+
+const AppPreferencesIndexRoute = AppPreferencesIndexImport.update({
+  id: '/preferences/',
+  path: '/preferences/',
   getParentRoute: () => AppRouteRoute,
 } as any)
 
@@ -116,6 +123,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardIndexImport
       parentRoute: typeof AppRouteImport
     }
+    '/app/preferences/': {
+      id: '/app/preferences/'
+      path: '/preferences'
+      fullPath: '/app/preferences'
+      preLoaderRoute: typeof AppPreferencesIndexImport
+      parentRoute: typeof AppRouteImport
+    }
   }
 }
 
@@ -137,12 +151,14 @@ interface AppRouteRouteChildren {
   AppCharactersRoute: typeof AppCharactersRouteWithChildren
   AppPracticeSetupRoute: typeof AppPracticeSetupRoute
   AppDashboardIndexRoute: typeof AppDashboardIndexRoute
+  AppPreferencesIndexRoute: typeof AppPreferencesIndexRoute
 }
 
 const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppCharactersRoute: AppCharactersRouteWithChildren,
   AppPracticeSetupRoute: AppPracticeSetupRoute,
   AppDashboardIndexRoute: AppDashboardIndexRoute,
+  AppPreferencesIndexRoute: AppPreferencesIndexRoute,
 }
 
 const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
@@ -157,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/characters': typeof CharactersIndexRoute
   '/app/characters/$char': typeof AppCharactersCharRoute
   '/app/dashboard': typeof AppDashboardIndexRoute
+  '/app/preferences': typeof AppPreferencesIndexRoute
 }
 
 export interface FileRoutesByTo {
@@ -167,6 +184,7 @@ export interface FileRoutesByTo {
   '/characters': typeof CharactersIndexRoute
   '/app/characters/$char': typeof AppCharactersCharRoute
   '/app/dashboard': typeof AppDashboardIndexRoute
+  '/app/preferences': typeof AppPreferencesIndexRoute
 }
 
 export interface FileRoutesById {
@@ -178,6 +196,7 @@ export interface FileRoutesById {
   '/characters/': typeof CharactersIndexRoute
   '/app/characters/$char': typeof AppCharactersCharRoute
   '/app/dashboard/': typeof AppDashboardIndexRoute
+  '/app/preferences/': typeof AppPreferencesIndexRoute
 }
 
 export interface FileRouteTypes {
@@ -190,6 +209,7 @@ export interface FileRouteTypes {
     | '/characters'
     | '/app/characters/$char'
     | '/app/dashboard'
+    | '/app/preferences'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -199,6 +219,7 @@ export interface FileRouteTypes {
     | '/characters'
     | '/app/characters/$char'
     | '/app/dashboard'
+    | '/app/preferences'
   id:
     | '__root__'
     | '/'
@@ -208,6 +229,7 @@ export interface FileRouteTypes {
     | '/characters/'
     | '/app/characters/$char'
     | '/app/dashboard/'
+    | '/app/preferences/'
   fileRoutesById: FileRoutesById
 }
 
@@ -246,7 +268,8 @@ export const routeTree = rootRoute
       "children": [
         "/app/characters",
         "/app/practice-setup",
-        "/app/dashboard/"
+        "/app/dashboard/",
+        "/app/preferences/"
       ]
     },
     "/app/characters": {
@@ -269,6 +292,10 @@ export const routeTree = rootRoute
     },
     "/app/dashboard/": {
       "filePath": "app/dashboard/index.tsx",
+      "parent": "/app"
+    },
+    "/app/preferences/": {
+      "filePath": "app/preferences/index.tsx",
       "parent": "/app"
     }
   }

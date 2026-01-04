@@ -96,6 +96,20 @@ body, html, #root {
   --noise: 0;
 }
 
+/** CIRCULAR PROGRESS THEMING */
+.CircularProgressbar-path {
+  stroke: var(--color-primary) !important;
+}
+.CircularProgressbar-trail {
+  stroke: var(--color-base-300) !important;
+  box-shadow: 0px 0px 1px 1px black;
+}
+.CircularProgressbar-text {
+  fill: var(--color-base-content) !important;
+}
+.CircularProgressbar-background {
+  fill: green;
+}
 
 
 

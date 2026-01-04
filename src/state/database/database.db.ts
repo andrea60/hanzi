@@ -42,7 +42,10 @@ export type SessionRow = {
   timeTakenSeconds: number;
 };
 
-export type UserPreferenceRow = {};
+export type UserPreferenceRow = {
+  userId: string;
+  weeklyTargetMinutes: number;
+};
 export const db = new Dexie("hanzi") as Dexie & {
   strokeData: Dexie.Table<StrokeDataRow>;
   dictionary: Dexie.Table<DictionaryRow>;
@@ -50,6 +53,7 @@ export const db = new Dexie("hanzi") as Dexie & {
   favourites: Dexie.Table<UserFavouriteRow>;
   wordSkillStatsV3: Dexie.Table<WordStatRow>;
   sessions: Dexie.Table<SessionRow>;
+  userPreference: Dexie.Table<UserPreferenceRow>;
 };
 db.version(3).stores({
   strokeData: "char",
@@ -57,5 +61,6 @@ db.version(3).stores({
   versions: "version, date",
   favourites: "[word+userId], userId, addedAt",
   wordSkillStatsV3: "[word+skill+userId], [word+userId], userId",
-  sessions: "[id+userId], userId",
+  sessions: "[id+userId], userId, [userId+timestamp]",
+  userPreference: "userId",
 });

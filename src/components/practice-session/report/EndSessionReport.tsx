@@ -7,12 +7,13 @@ import { PropsWithChildren } from "react";
 import { usePracticeSession } from "../../../state/practice-session/usePracticeSession";
 
 export const EndSessionReport = () => {
-  const { isCompleted, isRunning, closeSession } = usePracticeSession();
+  const { isCompleted, isRunning, closeSession, stats } = usePracticeSession();
 
   if (!isRunning || !isCompleted)
     throw new Error(
       "Unable to render an end session report if no session is active"
     );
+
   return (
     <div className="flex flex-col h-full">
       <h1 className="text-3xl font-bold text-center mb-2 pb-2 border-b border-base-300">

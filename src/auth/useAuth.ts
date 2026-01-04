@@ -10,7 +10,7 @@ import { auth } from "../firebase/firebase.config";
 import { useNavigate } from "@tanstack/react-router";
 
 export const useAuth = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(auth.currentUser);
   const navigate = useNavigate();
 
   useEffect(() => {

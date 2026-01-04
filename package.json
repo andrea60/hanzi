@@ -33,6 +33,7 @@
     "motion": "^12.7.4",
     "pinyin-tone": "^2.3.4",
     "react": "^19.0.0",
+    "react-circular-progressbar": "^2.2.0",
     "react-dom": "^19.0.0",
     "tailwindcss": "^4.1.4",
     "ts-pattern": "^5.8.0",

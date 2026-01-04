@@ -33,15 +33,14 @@ const CardContent = () => {
       () => noPrevSession
     )
     .otherwise(([session]) => (
-      <span className="text-2xl">{formatRelativeDate(session.timestamp)}</span>
+      <span className="text-2xl whitespace-nowrap font-bold">
+        {formatRelativeDate(session.timestamp)}
+      </span>
     ));
   return (
     <div className="card-body">
       <h1>Last Session</h1>
-      <div className="flex items-center gap-2 justify-between">
-        {content}
-        <CalendarDaysIcon className="size-8" />
-      </div>
+      <div className="flex items-center gap-2 justify-between">{content}</div>
     </div>
   );
 };

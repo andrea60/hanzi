@@ -49,7 +49,6 @@ export const NavigationBar = ({ links }: Props) => {
             >
               <Icon />
             </div>
-            <label className="text-xs mt-1">{link.label}</label>
           </div>
         );
       }),

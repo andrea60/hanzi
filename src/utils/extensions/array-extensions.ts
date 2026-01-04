@@ -1,6 +1,7 @@
 declare global {
   interface Array<T> {
     average(): number | undefined;
+    sum(project: (item: T) => number): number | undefined;
     sortByProperty<K extends keyof T>(key: K, dir: "asc" | "desc"): T[];
     sortBy(selector: (item: T) => any, dir: "asc" | "desc"): T[];
     min(selector: (item: T) => number): number;
@@ -14,6 +15,13 @@ Array.prototype.average = function (): number | undefined {
   if (this.length === 0) return undefined;
   const sum = this.reduce((acc, val) => acc + val, 0);
   return sum / this.length;
+};
+
+Array.prototype.sum = function <T>(
+  project: (item: T) => number
+): number | undefined {
+  if (this.length === 0) return undefined;
+  return this.reduce((acc, val) => acc + project(val), 0);
 };
 
 Array.prototype.sortByProperty = function <K extends keyof any>(
