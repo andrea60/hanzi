@@ -78,6 +78,7 @@ export abstract class PracticeScheduler {
     });
 
     // Take only the top N most urgent words
+    const uniqueWords = new Set<string>();
     const wordsToPractice = [];
     for (const wordSkill of wordsSkillsWithUrgency.sortByProperty(
       "urgency",
@@ -86,7 +87,11 @@ export abstract class PracticeScheduler {
       // if buffer is full, stop looking for new words
       if (wordsToPractice.length >= numWords) break;
 
+      // Avoid practicing the same word twice in the same session
+      if (uniqueWords.has(wordSkill.word)) continue;
+
       wordsToPractice.push(wordSkill);
+      uniqueWords.add(wordSkill.word);
     }
 
     const wordDefs = toMap(
