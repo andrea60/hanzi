@@ -5,8 +5,8 @@ export const PinyinTyper = () => {
   const { currentWord } = useRunningPracticeSession();
 
   const validateInput = (input: string) => {
-    const expectedInput = currentWord.pinyin.replace(/\w/g, "").toLowerCase();
-    const sanitizedInput = input.replace(/\w/g, "").toLowerCase();
+    const expectedInput = currentWord.pinyin.replace(/\s/g, "").toLowerCase();
+    const sanitizedInput = input.replace(/\s/g, "").toLowerCase();
 
     return expectedInput === sanitizedInput;
   };
